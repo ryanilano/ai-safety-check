@@ -1,0 +1,25 @@
+[project]
+name = "customer-experience-agent"
+version = "0.1.0"
+description = "Customer Experience Intelligence Agent — LangGraph + CRAFT MCP + Gemini"
+requires-python = "==3.12.*"
+dependencies = [
+    "google-genai==2.10.0",
+    "httpx==0.28.1",
+    "langgraph==1.2.6",
+    "plotly==6.8.0",
+    "python-dotenv==1.2.2",
+    "rich==15.0.0",
+    "tenacity==9.1.4",
+]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = false
+ignore_missing_imports = true
