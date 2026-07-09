@@ -11,8 +11,7 @@ enough to write the brief. There is no hard-coded question list or fixed pipelin
 tool-call sequence is different every run because the model plans it.
 
 Built for the Emergence hackathon, riffing on the reference
-[Customer Experience Intelligence Agent](https://emergenceai.atlassian.net/wiki/spaces/deveng/pages/1736933401/Customer+Experience+Intelligence+Agent)
-and the [Nebius DEV Environment MCP Setup Guide](https://emergenceai.atlassian.net/wiki/spaces/Product/pages/1717895195/Nebius+DEV+Environment+MCP+Setup+Guide).
+[Customer Experience Intelligence Agent](../customer-experience-agent/) in this same repo.
 
 ---
 
@@ -41,8 +40,8 @@ a tool call is Claude writing the final brief.
 ## Prerequisites
 
 - **Python 3.11+** (developed on 3.13).
-- **A DEV Keycloak / SSO account** for `runtime.dev.emergence.ai` — internal `emergence.ai`
-  developers use *Sign in with Google*. First run opens a browser for OAuth (once).
+- **A Keycloak / SSO account** for `runtime.dev.emergence.ai` (Emergence's dev CRAFT
+  environment). First run opens a browser for OAuth (once).
 - **Claude access.** Two supported auth paths (the code prefers Vertex when its env vars are set):
   - **Vertex AI via Google Cloud ADC** (used in development): `gcloud auth application-default login`,
     then set `ANTHROPIC_VERTEX_PROJECT_ID` and `CLOUD_ML_REGION` (e.g. `global`). No API key needed.
@@ -53,7 +52,7 @@ a tool call is Claude writing the final brief.
 ```bash
 # from the repository root
 python3 -m venv .venv
-.venv/bin/pip install -r seller_agent/requirements.txt
+.venv/bin/pip install -r apps/seller_delivery_agent/requirements.txt
 ```
 
 > This machine has no bare `python` on PATH — use `.venv/bin/python` (shown below). If your
@@ -76,7 +75,7 @@ export ANTHROPIC_API_KEY=sk-ant-...
 ### Web UI (primary — best for a demo)
 
 ```bash
-.venv/bin/streamlit run seller_agent/app.py
+.venv/bin/streamlit run apps/seller_delivery_agent/app.py
 ```
 
 Then in the browser:
@@ -90,7 +89,7 @@ Then in the browser:
 ### CLI (same pipeline, terminal only)
 
 ```bash
-.venv/bin/python -m seller_agent.agent [--seller-id <id>]
+.venv/bin/python -m apps.seller_delivery_agent.agent [--seller-id <id>]
 ```
 
 Default seller: `6560211a19b47992c3666cc44a7e94c0` — a verified high-volume seller (1,854 orders)
@@ -102,7 +101,7 @@ Both entrypoints share the exact same `agent.run()` pipeline; the UI is a thin w
 
 ## Outputs
 
-Each run writes to `seller_agent/runs/seller_{id_short}_{timestamp}/`:
+Each run writes to `apps/seller_delivery_agent/runs/seller_{id_short}_{timestamp}/`:
 
 | File | Description |
 | --- | --- |
@@ -120,8 +119,8 @@ The number of charts and queries varies run-to-run — the model decides.
 The agent is a standalone MCP client (`mcp` Python SDK) that talks to
 `https://runtime.dev.emergence.ai/mcp` over streamable HTTP, authenticating via Keycloak OAuth
 (`OAuthClientProvider`, static client `em-runtime-mcp`, callback port 9876). The token is cached to
-`seller_agent/.token_cache.json` (gitignored) and reused on later runs; expiry re-opens the browser
-automatically. Every request carries the required `X-Project-ID` header.
+`apps/seller_delivery_agent/.token_cache.json` (gitignored) and reused on later runs; expiry
+re-opens the browser automatically. Every request carries the required `X-Project-ID` header.
 
 **The primary OAuth path works** — no bearer-token fallback was needed. (Had auto-discovery failed,
 the fallback was to export `EM_RUNTIME_TOKEN` and send it as an `Authorization: Bearer` header.)
@@ -132,8 +131,8 @@ the fallback was to export `EM_RUNTIME_TOKEN` and send it as an `Authorization: 
 
 - **Port 9876 already in use** (OAuth callback): `lsof -ti:9876 | xargs kill`, then retry. Or change
   `OAUTH_CALLBACK_PORT` in `config.py`.
-- **`401 Unauthorized` / corrupted token**: `rm -f seller_agent/.token_cache.json` and re-run — the
-  OAuth flow restarts.
+- **`401 Unauthorized` / corrupted token**: `rm -f apps/seller_delivery_agent/.token_cache.json` and
+  re-run — the OAuth flow restarts.
 - **Browser didn't open**: copy the URL printed in the terminal and open it manually.
 - **`403 Forbidden` / empty results**: your account may not be provisioned for the shared DEV
   project — check with the platform team.
@@ -146,7 +145,7 @@ the fallback was to export `EM_RUNTIME_TOKEN` and send it as an `Authorization: 
 ## Project layout
 
 ```
-seller_agent/
+apps/seller_delivery_agent/
   app.py            # Streamlit UI (thin wrapper over agent.run)
   agent.py          # orchestration (drives the LLM loop) + CLI + progress callback
   llm.py            # client factory (Vertex/ADC or API key) + the agentic tool-use loop
@@ -156,6 +155,6 @@ seller_agent/
   craft_auth.py     # OAuth (FileTokenStorage + OAuthClientProvider)
   charts.py         # render a Plotly figure spec -> PNG
   config.py         # connection slug, project id, OAuth settings, default seller
-  tests/            # pytest suite (run: .venv/bin/python -m pytest seller_agent/tests/ -q)
+  tests/            # pytest suite (run: .venv/bin/python -m pytest apps/seller_delivery_agent/tests/ -q)
   runs/             # per-run output (gitignored)
 ```
