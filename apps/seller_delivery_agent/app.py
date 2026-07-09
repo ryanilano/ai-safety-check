@@ -11,8 +11,9 @@ import sys
 # `streamlit run apps/seller_delivery_agent/app.py` executes this file as a top-level script
 # (module name "__main__"), so relative imports have no package. Put the repo root on
 # sys.path and import the package absolutely — this works both under `streamlit run` and as
-# a module. app.py is two directories below repo root (apps/seller_delivery_agent/app.py),
-# so dirname must be applied twice.
+# a module. app.py lives two directories below repo root (apps/seller_delivery_agent/app.py),
+# so dirname must be applied three times: once to get from the file to its directory, then
+# once per directory level up to repo root.
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 import streamlit as st
