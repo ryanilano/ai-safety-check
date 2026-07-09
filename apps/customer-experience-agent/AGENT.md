@@ -110,7 +110,7 @@ Each run writes all artifacts to `runs/customer_{id}_{timestamp}/`.
 │  Node 5 · COMPOSE ENGAGEMENT                                            │
 │                                                                         │
 │  No MCP calls — pure LLM synthesis                                      │
-│  Gemini (gemini-2.5-flash) reads all collected evidence and writes:     │
+│  Gemini (see config.py for model) reads all evidence and writes:        │
 │    - Customer Snapshot                                                  │
 │    - Top 3 Product Recommendations (with rationale)                     │
 │    - Personalized Offer Strategy (targeted discounts)                   │

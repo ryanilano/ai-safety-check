@@ -59,7 +59,7 @@ python main.py 12345
 ### 1. Clone / navigate to the project
 
 ```bash
-cd customer-experience-agent
+cd apps/customer-experience-agent
 ```
 
 ### 2. Install dependencies

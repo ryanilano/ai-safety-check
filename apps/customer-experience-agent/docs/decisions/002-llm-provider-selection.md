@@ -27,3 +27,7 @@ Use **Gemini 2.5 Flash** (`gemini-2.5-flash`) for synthesis.
 
 **Neutral:**
 - Model name is overridable via `GEMINI_SYNTHESIS_MODEL` env var — upgrading to Pro requires only a config change
+
+> **Update:** the `GEMINI_FLASH_MODEL` default in `config.py` has since moved to a newer
+> Flash release; see `config.py` for the current default. The decision to use the Flash
+> tier over Pro, recorded above, still holds.
