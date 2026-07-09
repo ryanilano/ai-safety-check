@@ -12,14 +12,14 @@ Node 5 (compose_engagement) requires an LLM to synthesize structured data (purch
 
 ## Decision
 
-Use **Gemini 2.5 Flash** (`gemini-2.5-flash`) for synthesis. This matches the pattern already established in the f1-strategy-agent in this same project, which uses the same Gemini API key and SDK.
+Use **Gemini 2.5 Flash** (`gemini-2.5-flash`) for synthesis.
 
 ## Consequences
 
 **Positive:**
-- Consistent with f1-strategy-agent — same SDK (`google-genai`), same key, same error handling patterns
-- Flash is fast enough for a live demo (< 5s synthesis latency)
+- Fast enough for a live demo (< 5s synthesis latency)
 - Cost-efficient at scale vs Pro
+- Uses the `google-genai` SDK, consistent with the CRAFT MCP integration's existing tooling
 
 **Negative / Trade-offs:**
 - Flash may produce less nuanced personalization than Pro for complex customer profiles
