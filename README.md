@@ -1,7 +1,7 @@
 # nebius-emergence-hackathon
 
-Two agentic demos built on the [CRAFT](https://emergence.ai) semantic data platform (em-runtime
-MCP server), showing natural-language-driven analytics without hand-written SQL — one from the
+Two agentic demos built on the [CRAFT](https://emergence.ai) semantic data platform (CRAFT MCP
+server), showing natural-language-driven analytics without hand-written SQL — one from the
 seller side of a marketplace, one from the customer side.
 
 ---
@@ -39,10 +39,10 @@ See [apps/customer-experience-agent/README.md](apps/customer-experience-agent/RE
 ### [`mcp_starter.py`](mcp_starter.py)
 
 A single-file, dependency-light hand-off template for hackathon participants who want to talk to
-the em-runtime MCP server directly from their own Python, without adopting either agent's
-framework. It walks through the whole round-trip: OAuth 2.1 + PKCE (Keycloak SSO, browser opens
-once), `list_tools` to discover the server's capabilities, `generate_sql` to turn a
-natural-language question into SQL, and `execute_query` to run it and get rows back.
+the CRAFT MCP server directly from their own Python, without adopting either agent's framework.
+It walks through the whole round-trip: OAuth 2.1 + PKCE (Keycloak SSO, browser opens once),
+`list_tools` to discover the server's capabilities, `generate_sql` to turn a natural-language
+question into SQL, and `execute_query` to run it and get rows back.
 
 **Stack:** Python (single file, `uv`-run — no venv or `pip install` needed) · CRAFT MCP
 
