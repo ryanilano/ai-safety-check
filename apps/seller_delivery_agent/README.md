@@ -1,14 +1,19 @@
-# Seller Delivery Intelligence Agent
+# Seller Delivery Intelligence Agent (Marketplace Root-Cause Investigator)
 
-Point it at an Olist seller and it produces a personalized improvement brief — its
-thesis is the causal link between **late delivery and low review scores**. Every
-number comes from the seller's own data, pulled **entirely through the CRAFT
-(em-runtime) MCP server** — there is no hand-written SQL anywhere in the codebase.
+Ask a free-text question about the marketplace's data and Claude investigates it like a
+senior analyst: forms a hypothesis, tests it with real queries, follows the evidence, and
+reports the root cause. The default example question chases a specific thesis — the
+causal link between **late delivery and low review scores** — but the agent isn't
+seller-ID-scoped or tied to that one question; you can ask about freight costs, payment
+methods, regional trends, or anything else the marketplace data can answer. Every number
+comes from the data itself, pulled **entirely through the CRAFT (em-runtime) MCP
+server** — there is no hand-written SQL anywhere in the codebase.
 
 **The agent is LLM-orchestrated.** Claude is given the raw MCP tools and a goal; *it*
-decides which questions to ask, when to run each query, when to chart, and when it has
-enough to write the brief. There is no hard-coded question list or fixed pipeline — the
-tool-call sequence is different every run because the model plans it.
+decides which schema to explore, which questions to ask, when to run each query, when to
+chart, and when it has enough to write the report. There is no hard-coded question list
+or fixed pipeline — the tool-call sequence is different every run because the model plans
+it.
 
 Built for the Emergence hackathon, riffing on the reference
 [Customer Experience Intelligence Agent](../customer-experience-agent/) in this same repo.
@@ -17,23 +22,27 @@ Built for the Emergence hackathon, riffing on the reference
 
 ## What it does
 
-Given a seller_id, Claude runs an **agentic tool-use loop**. It has four tools, each
-backed by our authenticated CRAFT MCP session:
+Given a free-text question, Claude runs an **agentic tool-use loop**. It has eight tools,
+each backed by our authenticated CRAFT MCP session:
 
+- `note(thought)` — narrate its current hypothesis/reasoning live, before each step
+- `search_schema(query)` — find tables/columns by keyword when it doesn't know where something lives
+- `get_schema(fqn)` — read a table's columns, types, and business definitions
+- `sample_data(table_fqn)` — peek at real rows to understand values and formats
 - `generate_sql(question)` — describe an analytical question in words → schema-bound SQL
 - `execute_query(sql)` → an artifact handle
 - `get_result_page(artifact_fqn)` → the rows
 - `generate_plotly_chart(chart_type, data, options)` → a saved PNG
 
-Claude sequences the `generate_sql → execute_query → get_result_page` triplet itself for
-each question it decides to investigate (profile, delivery timing, review distribution,
-on-time-vs-late comparison, worst segments…), builds at least one chart of the
-delivery↔review correlation, then stops calling tools and writes a five-section brief:
-**Store Snapshot, Delivery Health, The Rating Impact, Top 3 Fixes, Watch-outs / Risk**.
+The model discovers the schema itself with the first three tools (no schema is handed to
+it up front), sequences the `generate_sql → execute_query → get_result_page` triplet for
+each hypothesis it decides to test, narrates its reasoning with `note()` along the way,
+builds at least one chart of the key finding, then stops calling tools and writes its
+final report as markdown: **Answer, Evidence, Recommendation, Caveats**.
 
 The system prompt sets the goal and the required output shape (guided-agentic); everything
-else — the questions, the order, the depth — is the model's call. The only step that isn't
-a tool call is Claude writing the final brief.
+else — the schema exploration, the questions, the order, the depth — is the model's call.
+The only step that isn't a tool call is Claude writing the final report.
 
 ---
 
@@ -82,18 +91,20 @@ Then in the browser:
 
 1. Click **Check connection** — completes the Keycloak OAuth login on first run and verifies the
    MCP server responds (`hello_world`).
-2. Keep the default seller (or pick another / paste a custom `seller_id`).
-3. Click **Run analysis** — watch the live progress, then the brief renders on the right, the two
-   charts on the left, and the generated SQL in an expander.
+2. Type your own question, or pick one of the example questions in the sidebar.
+3. Click **🔎 Investigate** — watch the live reasoning trace, then the report renders on the left,
+   any charts on the right, and the model's notes + generated SQL in expanders below.
 
 ### CLI (same pipeline, terminal only)
 
 ```bash
-.venv/bin/python -m apps.seller_delivery_agent.agent [--seller-id <id>]
+.venv/bin/python -m apps.seller_delivery_agent.agent ["<question>"]
 ```
 
-Default seller: `6560211a19b47992c3666cc44a7e94c0` — a verified high-volume seller (1,854 orders)
-whose data shows the thesis clearly: **on-time orders average ~4.0★ vs ~2.5★ for late orders.**
+Defaults to the same example question as the UI if you omit it: *"Late deliveries seem to
+be hurting customer satisfaction. Is that true, how big is the impact, and which product
+categories are worst affected?"* — a verified investigation prompt whose data shows the
+thesis clearly: **on-time orders average ~4.0★ vs ~2.5★ for late orders.**
 
 Both entrypoints share the exact same `agent.run()` pipeline; the UI is a thin wrapper.
 
@@ -101,11 +112,12 @@ Both entrypoints share the exact same `agent.run()` pipeline; the UI is a thin w
 
 ## Outputs
 
-Each run writes to `apps/seller_delivery_agent/runs/seller_{id_short}_{timestamp}/`:
+Each run writes to `apps/seller_delivery_agent/runs/investigation_{timestamp}/`:
 
 | File | Description |
 | --- | --- |
-| `engagement_brief.md` | The personalized seller improvement brief |
+| `report.md` | The final root-cause report (Answer, Evidence, Recommendation, Caveats) |
+| `reasoning_trace.md` | The model's own `note()` narration, in order |
 | `chart_1.png`, `chart_2.png`, … | The charts the model chose to build |
 | `sql_queries.txt` | Every query the model generated (audit trail — none hand-written) |
 | `raw_data.json` | The result rows the model collected, tagged by the question that produced them |
@@ -122,8 +134,7 @@ The agent is a standalone MCP client (`mcp` Python SDK) that talks to
 `apps/seller_delivery_agent/.token_cache.json` (gitignored) and reused on later runs; expiry
 re-opens the browser automatically. Every request carries the required `X-Project-ID` header.
 
-**The primary OAuth path works** — no bearer-token fallback was needed. (Had auto-discovery failed,
-the fallback was to export `EM_RUNTIME_TOKEN` and send it as an `Authorization: Bearer` header.)
+**The primary OAuth path works** — no bearer-token fallback is implemented in this codebase.
 
 ---
 
@@ -150,11 +161,11 @@ apps/seller_delivery_agent/
   agent.py          # orchestration (drives the LLM loop) + CLI + progress callback
   llm.py            # client factory (Vertex/ADC or API key) + the agentic tool-use loop
   tools.py          # Anthropic tool defs + ToolExecutor (bridges tool calls -> MCP session)
-  prompts.py        # system prompt (goal + schema hint + 5-section output spec)
+  prompts.py        # system prompt (goal + dataset hint + 4-section output spec)
   craft_client.py   # MCP session + response parsers (backs the tools)
   craft_auth.py     # OAuth (FileTokenStorage + OAuthClientProvider)
   charts.py         # render a Plotly figure spec -> PNG
-  config.py         # connection slug, project id, OAuth settings, default seller
+  config.py         # connection slug, project id, OAuth settings
   tests/            # pytest suite (run: .venv/bin/python -m pytest apps/seller_delivery_agent/tests/ -q)
   runs/             # per-run output (gitignored)
 ```

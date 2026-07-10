@@ -4,10 +4,10 @@
 #   "mcp==1.26.0",
 # ]
 # ///
-"""Starter example: talk to the em-runtime MCP server from your own Python.
+"""Starter example: talk to the CRAFT MCP server from your own Python.
 
 This is a hand-off template for hackathon participants. It shows the *whole*
-round-trip against the em-runtime MCP endpoint:
+round-trip against the CRAFT MCP endpoint:
 
     1. authenticate  (OAuth 2.1 + PKCE / Keycloak SSO — browser opens once)
     2. list_tools    (discover what the server can do)
@@ -18,16 +18,16 @@ round-trip against the em-runtime MCP endpoint:
 Run it with `uv` — no venv or `pip install` needed, the header above pulls the
 one dependency automatically:
 
-    uv run scripts/mcp_starter.py
+    uv run mcp_starter.py
 
 On the *first* run a browser tab opens for SSO login; the token is cached under
 ~/.cache/em-talk2data/ so every later run is silent. Force a fresh login with:
 
-    uv run scripts/mcp_starter.py --reset-auth
+    uv run mcp_starter.py --reset-auth
 
 To just see the raw tool catalogue (names + JSON input schemas) and stop:
 
-    uv run scripts/mcp_starter.py --list-tools
+    uv run mcp_starter.py --list-tools
 
 ------------------------------------------------------------------------------
  EVERYTHING you normally need to change lives in the CONFIG block right below.
@@ -57,8 +57,7 @@ from mcp.shared.auth import OAuthClientInformationFull, OAuthClientMetadata, OAu
 # ============================================================================
 
 # Which cluster's MCP endpoint to hit, and which project you're scoped to.
-# Ask your host for the right PROJECT_ID (it changes when a cluster is recreated;
-# `scripts/mcp_setup.sh` prints it for local clusters).
+# Ask your host for the right PROJECT_ID (it changes when a cluster is recreated).
 MCP_URL: str = "https://nebius.emergence.ai/mcp"
 PROJECT_ID: str = "<Your Project Id>"
 
