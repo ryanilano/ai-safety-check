@@ -34,6 +34,31 @@ See [apps/customer-experience-agent/README.md](apps/customer-experience-agent/RE
 
 ---
 
+## Starter Script
+
+### [`mcp_starter.py`](mcp_starter.py)
+
+A single-file, dependency-light hand-off template for hackathon participants who want to talk to
+the em-runtime MCP server directly from their own Python, without adopting either agent's
+framework. It walks through the whole round-trip: OAuth 2.1 + PKCE (Keycloak SSO, browser opens
+once), `list_tools` to discover the server's capabilities, `generate_sql` to turn a
+natural-language question into SQL, and `execute_query` to run it and get rows back.
+
+**Stack:** Python (single file, `uv`-run — no venv or `pip install` needed) · CRAFT MCP
+
+**Run:**
+```bash
+uv run mcp_starter.py                # ask the default question, print the SQL + rows
+uv run mcp_starter.py --list-tools   # just dump the MCP tool catalogue and exit
+uv run mcp_starter.py --reset-auth   # force a fresh SSO login
+```
+
+Edit the `CONFIG` block at the top of the file (`MCP_URL`, `PROJECT_ID`, `CONNECTION`,
+`SCHEMA_NAME`, `QUESTION`) for your environment — everything below it is OAuth boilerplate you
+can leave as-is.
+
+---
+
 ## Quick Start
 
 Each agent is a self-contained project with its own dependencies and environment config — see
