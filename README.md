@@ -10,9 +10,10 @@ seller side of a marketplace, one from the customer side.
 
 ### [Seller Delivery Intelligence Agent](apps/seller_delivery_agent/)
 
-Point it at an Olist marketplace seller and it produces a personalized improvement brief, built
-entirely through an LLM-orchestrated tool-use loop — Claude decides which questions to ask and
-when, with every query flowing through the CRAFT MCP server (no hand-written SQL anywhere).
+Ask a free-text question about an Olist marketplace's data and it investigates like a root-cause
+analyst, built entirely through an LLM-orchestrated tool-use loop — Claude decides which schema
+to explore, which questions to ask, and when, with every query flowing through the CRAFT MCP
+server (no hand-written SQL anywhere).
 
 **Stack:** Python · Claude (Anthropic) · CRAFT MCP (Text2SQL) · Streamlit
 **Run:** `streamlit run apps/seller_delivery_agent/app.py`
@@ -55,7 +56,9 @@ uv run mcp_starter.py --reset-auth   # force a fresh SSO login
 
 Edit the `CONFIG` block at the top of the file (`MCP_URL`, `PROJECT_ID`, `CONNECTION`,
 `SCHEMA_NAME`, `QUESTION`) for your environment — everything below it is OAuth boilerplate you
-can leave as-is.
+can leave as-is. The file's default `MCP_URL` points at a different CRAFT cluster than the two
+agents above (`runtime.dev.emergence.ai`) — both are real CRAFT MCP deployments; ask your host
+which one your hackathon account is provisioned for and point `MCP_URL`/`PROJECT_ID` there.
 
 ---
 
@@ -81,7 +84,7 @@ export ANTHROPIC_API_KEY=sk-ant-...
 .venv/bin/streamlit run apps/seller_delivery_agent/app.py
 
 # — or CLI —
-.venv/bin/python -m apps.seller_delivery_agent.agent [--seller-id <id>]
+.venv/bin/python -m apps.seller_delivery_agent.agent ["<question>"]
 ```
 
 First run opens a browser for Keycloak/SSO login against `runtime.dev.emergence.ai` (one-time

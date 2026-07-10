@@ -10,7 +10,7 @@ Newest entries at the top.
 
 **Root cause:** `get_schema` enforces `can_read_metadata` on the data connection. The Keycloak token may not have this permission for the target database even if `execute_query` and `generate_sql` work fine.
 
-**Fix:** `get_schema` failure is now non-fatal. `discover_profile_node` falls back to the hardcoded `_THELOOK_KNOWN_TABLES` list and continues. The schema summary is populated with a static description rather than the catalog entry.
+**Fix:** `get_schema` failure is now non-fatal. `discover_profile_node` appends the error to `errors` and continues with an empty `schema_summary`/`tables_available` rather than stopping the graph.
 
 ---
 
@@ -20,7 +20,7 @@ Newest entries at the top.
 
 **Root cause:** Talk2Data uses the catalog metadata to understand the schema before generating SQL. If `get_schema` failed (metadata unavailable), Talk2Data may also fail to resolve the database schema.
 
-**Fix:** Every `_run_nl_query` call now accepts a `fallback_sql` parameter containing hand-written SQL. When `generate_sql` fails, the fallback is executed directly via `execute_query`, bypassing Text2SQL entirely. The fallback SQL is appended to the audit trail marked `-- (fallback)`.
+**Fix:** `_run_nl_query` treats this as non-fatal: it appends the error to `node_errors` and returns an empty row list, so the node continues (with that piece of data missing) instead of crashing the graph. There is no SQL fallback — if `generate_sql` fails, that query simply returns no rows.
 
 ---
 
