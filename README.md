@@ -13,6 +13,7 @@ We're all installing AI tools as fast as they ship — agents, MCPs, whatever hi
 ** Ask what the latest greatest AI/LLM tools are... get an evidence backed security audit!
 
 ``CHECK IT OUT LIVE HERE: https://ai-safety-check-79hkfz9cpbhk9m82wpzpgr.streamlit.app/``
+<img width="2279" height="3679" alt="CleanShot 2026-07-11 at 18 26 44@2x" src="https://github.com/user-attachments/assets/85027d60-9a58-4dc8-a42e-642bcbca82f1" />
 
 
 ## The hook: hindsight as a feature
