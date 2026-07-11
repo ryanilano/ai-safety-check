@@ -95,7 +95,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 with st.container():
     submitted = st.chat_input(
-        "Lookin' for agents?  ·  What's the best MCP right now?")
+        "Looking for agents?  ·  What's the best MCP right now?")
 if submitted:
     from apps.ai_safety_check.craft_client import CraftClient
     craft = CraftClient()
