@@ -4,7 +4,20 @@ import glob
 import json
 import asyncio
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+_APP_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.dirname(os.path.dirname(_APP_DIR)))
+
+# Read-only cloud mode: with no credentials configured (e.g. Streamlit
+# Community Cloud), stub the required env vars so config imports, render the
+# cached run, and disable the live re-run / ask features.
+_REQUIRED = ("MCP_URL", "PROJECT_ID", "KEYCLOAK_URL", "KEYCLOAK_REFRESH_TOKEN",
+             "DEPS_CONNECTION", "GITHUB_CONNECTION", "NEBIUS_API_KEY")
+from dotenv import load_dotenv
+load_dotenv(os.path.join(_APP_DIR, ".env"))
+LIVE = all(os.environ.get(k) for k in _REQUIRED)
+if not LIVE:
+    for _k in _REQUIRED:
+        os.environ.setdefault(_k, "readonly-demo")
 
 import streamlit as st
 from apps.ai_safety_check import report, main
@@ -16,7 +29,7 @@ VERDICT_DOT = {"RED": "🔴", "YELLOW": "🟡", "GREEN": "🟢"}
 
 
 def _latest_state():
-    runs = sorted(glob.glob("runs/safety_*/state.json"))
+    runs = sorted(glob.glob(os.path.join(_APP_DIR, "runs", "safety_*", "state.json")))
     if not runs:
         return None
     with open(runs[-1]) as f:
@@ -51,7 +64,10 @@ with st.sidebar:
         "- [Common dangers](#common-dangers)"
     )
     st.markdown("### Controls")
-    if st.button("Re-run live", icon=":material/refresh:"):
+    if not LIVE:
+        st.caption("Read-only demo: rendering the cached run. Live re-run and "
+                   "natural-language queries need CRAFT/Nebius credentials.")
+    if st.button("Re-run live", icon=":material/refresh:", disabled=not LIVE):
         with st.status("Running safety check…", expanded=True) as status:
             state = asyncio.run(main.run())
             out_dir = main._create_run_dir()
@@ -95,7 +111,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 with st.container():
     submitted = st.chat_input(
-        "Looking for agents?  ·  What's the best MCP right now?")
+        "Looking for agents?  ·  What's the best MCP right now?",
+        disabled=not LIVE)
 if submitted:
     from apps.ai_safety_check.craft_client import CraftClient
     craft = CraftClient()
