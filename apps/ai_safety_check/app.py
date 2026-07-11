@@ -28,9 +28,12 @@ state = st.session_state.get("state") or _latest_state()
 col_run, col_ask = st.columns([1, 2])
 with col_run:
     if st.button("Re-run live"):
-        with st.status("Running safety check…", expanded=True):
+        with st.status("Running safety check…", expanded=True) as status:
             state = asyncio.run(main.run())
+            out_dir = main._create_run_dir()
+            main.save_artifacts(state, out_dir)
             st.session_state["state"] = state
+            status.update(label=f"Done — saved to {out_dir}", state="complete")
 with col_ask:
     q = st.text_input("Ask the supply chain (plain English):",
                       placeholder="Which AI agents execute code but have unpatched critical CVEs?")
