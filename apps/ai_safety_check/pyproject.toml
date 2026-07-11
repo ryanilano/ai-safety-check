@@ -1,0 +1,21 @@
+[project]
+name = "ai-safety-check"
+version = "0.1.0"
+requires-python = "==3.12.*"
+dependencies = [
+    "langgraph==1.2.6",
+    "httpx==0.28.1",
+    "openai>=1.40",
+    "tenacity==9.1.4",
+    "plotly==6.8.0",
+    "kaleido==0.2.1",
+    "streamlit>=1.36",
+    "python-dotenv==1.2.2",
+    "rich==15.0.0",
+]
+
+[dependency-groups]
+dev = ["pytest>=8.0", "pytest-asyncio>=0.23"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
