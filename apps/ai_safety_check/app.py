@@ -11,8 +11,8 @@ from apps.ai_safety_check import report, main
 from apps.ai_safety_check import config
 
 st.set_page_config(page_title="AI Safety Check", page_icon="🚦", layout="wide")
-st.title("🔴🟡🟢 LLM / AI safety check")
-st.caption("Red light, green light for self-hosted AI — would you run this on your laptop?")
+
+VERDICT_DOT = {"RED": "🔴", "YELLOW": "🟡", "GREEN": "🟢"}
 
 
 def _latest_state():
@@ -23,10 +23,34 @@ def _latest_state():
         return json.load(f)
 
 
+def _sections(md: str) -> dict:
+    """Split the rendered report into its '## ' sections (title -> body)."""
+    out, title, buf = {}, None, []
+    for line in md.splitlines():
+        if line.startswith("## "):
+            if title:
+                out[title] = "\n".join(buf).strip()
+            title, buf = line[3:].strip(), []
+        elif title:
+            buf.append(line)
+    if title:
+        out[title] = "\n".join(buf).strip()
+    return out
+
+
 state = st.session_state.get("state") or _latest_state()
 
-col_run, col_ask = st.columns([1, 2])
-with col_run:
+# ── Index (left) ──────────────────────────────────────────────────────────────
+with st.sidebar:
+    st.markdown("### Index")
+    st.markdown(
+        "- [Bad repos](#bad-repos)\n"
+        "- [Leaderboard](#leaderboard)\n"
+        "- [Case studies](#case-studies)\n"
+        "- [Common dangers](#common-dangers)\n"
+        "- [Ask the supply chain](#ask)"
+    )
+    st.markdown("### Controls")
     if st.button("Re-run live", icon=":material/refresh:"):
         with st.status("Running safety check…", expanded=True) as status:
             state = asyncio.run(main.run())
@@ -34,45 +58,90 @@ with col_run:
             main.save_artifacts(state, out_dir)
             st.session_state["state"] = state
             status.update(label=f"Done — saved to {out_dir}", state="complete")
-with col_ask:
-    q = st.text_input("Ask the supply chain (plain English):",
-                      placeholder="Which AI agents execute code but have unpatched critical CVEs?")
-    if q:
-        from apps.ai_safety_check.craft_client import CraftClient
-        craft = CraftClient()
-        result, sql = asyncio.run(craft.nl_query(
-            q, config.DEPS_CONNECTION, config.DEPS_SCHEMA_NAME, config.DEPS_SCHEMA_FQN))
-        st.dataframe({c: [r[i] for r in result.get("rows", [])]
-                      for i, c in enumerate(result.get("columns", []))})
-        with st.expander("Generated SQL", icon=":material/code:"):
-            st.code(sql, language="sql")
+    st.caption("Signals: CVE load · dangerous capability · staleness · "
+               "blast radius · upstream health · identity trust — graded "
+               "live from deps.dev via CRAFT text-to-SQL.")
 
-if state:
-    tools = state.get("tools", [])
-    verdicts = [t.get("verdict") for t in tools]
-    m_tools, m_red, m_yellow, m_green, m_cves = st.columns(5)
-    m_tools.metric("Tools graded", len(tools), border=True)
-    m_red.metric("🔴 Red — don't run", verdicts.count("RED"), border=True)
-    m_yellow.metric("🟡 Yellow — caution", verdicts.count("YELLOW"), border=True)
-    m_green.metric("🟢 Green — go", verdicts.count("GREEN"), border=True)
-    critical = sum(
-        (t.get("signals", {}).get("cve", {}).get("counts") or {}).get("CRITICAL", 0)
-        for t in tools)
-    m_cves.metric("Critical advisories", critical, border=True)
+# ── Giant copy (top) ──────────────────────────────────────────────────────────
+st.html(
+    '<div style="font-size:72px;font-weight:800;line-height:1.05;'
+    'letter-spacing:-0.02em;margin-bottom:0.15em">🔴🟡🟢 Would you<br>run this on your laptop?</div>'
+    '<div style="font-size:22px;color:#8a919e;margin-bottom:0.6em">'
+    'Red light, green light for self-hosted AI — the LLM / AI safety check.</div>'
+)
 
-    left, right = st.columns([3, 2])
-    with left:
-        st.markdown(report.render_markdown(state))
-    with right:
-        with st.container(border=True):
-            st.plotly_chart(report.leaderboard_figure(state), width="stretch")
-        if state.get("errors"):
-            with st.expander("Run warnings", icon=":material/warning:"):
-                for e in state["errors"]:
-                    st.caption(e)
-        st.caption("Signals: CVE load · dangerous capability · staleness · "
-                   "blast radius · upstream health · identity trust — "
-                   "graded live from deps.dev via CRAFT text-to-SQL.")
-else:
+if not state:
     st.info("No cached run yet. Click **Re-run live** to generate one.",
             icon=":material/play_circle:")
+    st.stop()
+
+tools = state.get("tools", [])
+verdicts = [t.get("verdict") for t in tools]
+m_tools, m_red, m_yellow, m_green, m_cves = st.columns(5)
+m_tools.metric("Tools graded", len(tools), border=True)
+m_red.metric("🔴 Red — don't run", verdicts.count("RED"), border=True)
+m_yellow.metric("🟡 Yellow — caution", verdicts.count("YELLOW"), border=True)
+m_green.metric("🟢 Green — go", verdicts.count("GREEN"), border=True)
+critical = sum(
+    (t.get("signals", {}).get("cve", {}).get("counts") or {}).get("CRITICAL", 0)
+    for t in tools)
+m_cves.metric("Critical advisories", critical, border=True)
+
+# ── Bad repos ─────────────────────────────────────────────────────────────────
+st.header("🚨 Bad repos", anchor="bad-repos")
+bad = [t for t in tools if t.get("verdict") == "RED"]
+if not bad:
+    st.caption("No RED verdicts in this run.")
+for row in range(0, len(bad), 3):
+    cols = st.columns(3)
+    for col, t in zip(cols, bad[row:row + 3]):
+        with col, st.container(border=True):
+            st.subheader(f"🔴 {t['name']}")
+            st.caption(f"{t.get('category', '?')} — {t.get('significance', '')}")
+            sig = t.get("signals", {})
+            cve = sig.get("cve", {})
+            if cve.get("detail"):
+                st.markdown(f":red-badge[{cve['detail']}]")
+            ident = sig.get("identity", {})
+            if ident.get("verdict") == "RED":
+                st.markdown(f":orange-badge[{ident.get('detail', 'identity risk')}]")
+            hind = t.get("hindsight") or {}
+            if hind.get("tag"):
+                link = f" ([source]({hind['source_url']}))" if hind.get("source_url") else ""
+                st.markdown(f"**What happened next:** {hind['tag']}{link}")
+
+# ── Leaderboard ───────────────────────────────────────────────────────────────
+sections = _sections(report.render_markdown(state))
+st.header("Leaderboard", anchor="leaderboard")
+lb_left, lb_right = st.columns([3, 2])
+with lb_left:
+    st.markdown(sections.get("Leaderboard", ""))
+with lb_right:
+    with st.container(border=True):
+        st.plotly_chart(report.leaderboard_figure(state), width="stretch")
+
+# ── Case studies / dangers ────────────────────────────────────────────────────
+st.header("Case studies", anchor="case-studies")
+st.markdown(sections.get("Case Studies", ""))
+
+st.header("Common dangers", anchor="common-dangers")
+st.markdown(sections.get("Common Dangers", ""))
+
+if state.get("errors"):
+    with st.expander("Run warnings", icon=":material/warning:"):
+        for e in state["errors"]:
+            st.caption(e)
+
+# ── Ask the supply chain ──────────────────────────────────────────────────────
+st.header("Ask the supply chain", anchor="ask")
+q = st.text_input("Ask the supply chain (plain English):",
+                  placeholder="Which AI agents execute code but have unpatched critical CVEs?")
+if q:
+    from apps.ai_safety_check.craft_client import CraftClient
+    craft = CraftClient()
+    result, sql = asyncio.run(craft.nl_query(
+        q, config.DEPS_CONNECTION, config.DEPS_SCHEMA_NAME, config.DEPS_SCHEMA_FQN))
+    st.dataframe({c: [r[i] for r in result.get("rows", [])]
+                  for i, c in enumerate(result.get("columns", []))})
+    with st.expander("Generated SQL", icon=":material/code:"):
+        st.code(sql, language="sql")
