@@ -81,6 +81,12 @@ st.markdown("""
   padding: 14px 18px;
   min-height: 96px;
   align-items: flex-start;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+[data-testid="stChatInput"] > div {
+  width: 100% !important;
+  max-width: 100% !important;
 }
 [data-testid="stChatInput"] textarea {
   font-size: 17px;
