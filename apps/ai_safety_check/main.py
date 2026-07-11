@@ -30,10 +30,11 @@ def _create_run_dir() -> str:
 
 def save_artifacts(state: dict, out_dir: str) -> None:
     os.makedirs(out_dir, exist_ok=True)
-    with open(os.path.join(out_dir, "report.md"), "w") as f:
-        f.write(report.render_markdown(state))
+    # state.json first: a render bug must never lose the run's data.
     with open(os.path.join(out_dir, "state.json"), "w") as f:
         json.dump(state, f, indent=2, default=str)
+    with open(os.path.join(out_dir, "report.md"), "w") as f:
+        f.write(report.render_markdown(state))
     with open(os.path.join(out_dir, "sql_queries.txt"), "w") as f:
         pipeline_log = state.get("sql_log") or []
         if pipeline_log:

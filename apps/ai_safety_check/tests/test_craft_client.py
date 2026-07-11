@@ -47,6 +47,27 @@ def test_extract_result_wraps_non_dict_response():
     assert out["error"]["code"] == "non_dict_response"
 
 
+def test_nl_query_reads_sql_nested_under_tool_name(monkeypatch):
+    # Live CRAFT returns {"ok": true, "generate_sql": {"sql": ...}} — the SQL
+    # is nested under the tool name, not top-level. Reading only the flat
+    # "sql" key made nl_query silently return no SQL (empty leaderboard).
+    async def fake_call(self, tool: str, arguments: dict):
+        if tool == "generate_sql":
+            return {"ok": True, "generate_sql": {"sql": "SELECT 1"}}
+        if tool == "execute_query":
+            return {"ok": True,
+                    "execute_query": {"artifact_fqn": "a", "row_count": 1}}
+        if tool == "get_result_page":
+            return {"preview": {"columns": ["N"], "rows": [[1]]}}
+        raise AssertionError(f"unexpected tool call: {tool}")
+
+    monkeypatch.setattr(CraftClient, "call", fake_call)
+    c = CraftClient()
+    result, sql = asyncio.run(c.nl_query("q", "deps_conn", "S", "S.D.S"))
+    assert sql == "SELECT 1"
+    assert result["rows"] == [[1]]
+
+
 def test_execute_query_returns_positional_list_of_lists(monkeypatch):
     # execute_query() calls self.call(...) twice — once for "execute_query"
     # (to get artifact_fqn/row_count) and once for "get_result_page" (to get

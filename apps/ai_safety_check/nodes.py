@@ -66,7 +66,13 @@ async def discover_candidates_node(state, craft) -> dict:
         name = str(name_cell).split("/")[-1].strip()
         if name:
             cands.append({"name": name, "stars": stars})
+    errors = list(state.get("errors", []))
+    if not cands:
+        # A silent zero here cascades into an empty (or hallucinated) report.
+        detail = (result or {}).get("error") or ("no sql" if not sql else "no rows")
+        errors.append(f"discover returned 0 candidates: {detail}")
     return {"candidates": cands, "coverage": {"discovered": len(cands)},
+            "errors": errors,
             "sql_log": state.get("sql_log", []) + [("discover", sql)]}
 
 
@@ -215,14 +221,22 @@ async def dangers_node(state, llm) -> dict:
         f"- {t['name']} [{t['verdict']}] caps={t.get('capabilities')} "
         f"cve={t['signals'].get('cve', {}).get('detail', 'n/a')}"
         for t in tools if t.get("signals"))
+    if not summary:
+        # With no graded tools the LLM invents plausible-sounding filler
+        # ("ToolA", "ToolB"); an empty dangers list is the honest answer.
+        return {"dangers": []}
     prompt = ("From these graded AI tools, identify the 3-5 recurring supply-chain danger PATTERNS. "
               "Return a JSON array of objects with keys 'pattern', 'seen_in' (list of tool names), "
               "'remediation' (one sentence). Return ONLY JSON.\n\n" + summary)
     try:
         raw = llm.complete(prompt, json_mode=True)
-        dangers = json.loads(_strip_fence(raw))
+        parsed = json.loads(_strip_fence(raw))
     except Exception:
-        dangers = []
+        parsed = []
+    # The model sometimes returns valid JSON of the wrong shape (e.g. a list
+    # of strings); keep only items matching the state contract (list[dict]).
+    dangers = [d for d in parsed if isinstance(d, dict)] \
+        if isinstance(parsed, list) else []
     return {"dangers": dangers}
 
 

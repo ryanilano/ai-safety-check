@@ -162,6 +162,43 @@ class FakeTavily:
     def search(self, q): return [{"title": "t", "url": "http://x", "content": "exploited"}]
 
 
+def test_dangers_node_drops_non_dict_items():
+    # Live Nemotron run returned a JSON array of strings — valid JSON, wrong
+    # shape — which crashed report rendering. Only well-formed dicts may pass.
+    class StringListLLM:
+        def complete(self, prompt, json_mode=False):
+            return ('["typosquatting", {"pattern": "executes code", '
+                    '"seen_in": ["autogpt"], "remediation": "sandbox it"}, 42]')
+
+    out = asyncio.run(nodes.dangers_node(
+        {"tools": [{"name": "autogpt", "verdict": "RED",
+                    "signals": {"cve": {"detail": "2 critical"}}}]},
+        llm=StringListLLM()))
+    assert out["dangers"] == [{"pattern": "executes code",
+                               "seen_in": ["autogpt"],
+                               "remediation": "sandbox it"}]
+
+
+def test_dangers_node_skips_llm_when_nothing_graded():
+    # An empty summary must not reach the LLM — it hallucinates filler
+    # dangers ("ToolA", "ToolB") when given nothing to summarize.
+    class ExplodingLLM:
+        def complete(self, prompt, json_mode=False):
+            raise AssertionError("LLM must not be called with no graded tools")
+
+    out = asyncio.run(nodes.dangers_node({"tools": []}, llm=ExplodingLLM()))
+    assert out["dangers"] == []
+
+
+def test_discover_node_records_error_on_zero_candidates():
+    async def nl_query(question, connection, schema_name, schema_fqn, max_rows=200):
+        return ({"ok": False, "error": {"code": "boom"}}, "")
+    craft = type("C", (), {"nl_query": staticmethod(nl_query)})()
+    out = asyncio.run(nodes.discover_candidates_node({"sql_log": []}, craft))
+    assert out["candidates"] == []
+    assert any("discover returned 0 candidates" in e for e in out["errors"])
+
+
 def test_graph_runs_end_to_end():
     craft = FakeCraft()
 

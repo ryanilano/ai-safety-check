@@ -283,7 +283,10 @@ class CraftClient:
         rows and the SQL text for the audit trail.
         """
         sql_resp = await self.generate_sql(question, connection, schema_name, schema_fqn)
-        generated_sql = (sql_resp or {}).get("sql", "")
+        # Live CRAFT nests the payload under the tool name ({"ok": true,
+        # "generate_sql": {"sql": ...}}), same convention execute_query uses.
+        nested = (sql_resp or {}).get("generate_sql") or {}
+        generated_sql = nested.get("sql") or (sql_resp or {}).get("sql", "")
         if not sql_resp or not sql_resp.get("ok") or not generated_sql:
             return sql_resp or {"ok": False}, generated_sql
         result = await self.execute_query(generated_sql, connection, max_rows=max_rows)

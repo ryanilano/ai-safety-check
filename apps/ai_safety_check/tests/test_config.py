@@ -3,6 +3,11 @@ import pytest
 
 
 def _reload_config(monkeypatch, **env):
+    # Neutralize load_dotenv so a developer's real .env can't leak into tests.
+    import dotenv
+    monkeypatch.setattr(dotenv, "load_dotenv", lambda *a, **kw: False)
+    for k in ("NEBIUS_API_KEY", "TAVILY_API_KEY", "NEBIUS_BASE_URL", "NEBIUS_MODEL"):
+        monkeypatch.delenv(k, raising=False)
     for k, v in env.items():
         monkeypatch.setenv(k, v)
     import apps.ai_safety_check.config as config
