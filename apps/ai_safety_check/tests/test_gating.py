@@ -58,3 +58,7 @@ def test_composite_all_green():
     signals = {k: {"verdict": "GREEN"} for k in
                ["cve", "capability", "staleness", "blast", "health", "identity"]}
     assert gating.composite(signals) == "GREEN"
+
+
+def test_composite_empty_signals_is_green():
+    assert gating.composite({}) == "GREEN"

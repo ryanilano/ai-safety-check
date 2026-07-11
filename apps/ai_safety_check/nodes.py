@@ -41,57 +41,63 @@ async def classify_node(state, llm) -> dict:
 
 async def gate_node(state, craft) -> dict:
     graded = []
+    errors = list(state.get("errors", []))
     for tool in state.get("tools", []):
         log = list(tool.get("sql_log", []))
-        # CVE
-        r, sql = await craft.nl_query(queries.advisories_for(tool["name"]),
-                                      config.DEPS_CONNECTION, config.DEPS_SCHEMA_NAME, config.DEPS_SCHEMA_FQN)
-        log.append(("advisories:" + tool["name"], sql))
-        counts = {"CRITICAL": 0, "HIGH": 0, "MODERATE": 0}
-        worst = None
-        for row in _rows(r):
-            sev = str(row[2]).upper() if len(row) > 2 else "UNKNOWN"
-            if sev in counts:
-                counts[sev] += 1
-            if len(row) > 1:
-                try:
-                    cv = float(row[1])
-                    worst = cv if worst is None else max(worst, cv)
-                except (TypeError, ValueError):
-                    pass
-        cve = gating.grade_cve(counts, worst)
-        has_cve = cve["verdict"] in ("RED", "YELLOW")
-        # capability (from classification)
-        cap = gating.grade_capability(tool.get("capabilities", []), has_cve)
-        # staleness
-        r, sql = await craft.nl_query(queries.staleness_for(tool["name"], tool["system"]),
-                                      config.DEPS_CONNECTION, config.DEPS_SCHEMA_NAME, config.DEPS_SCHEMA_FQN)
-        log.append(("staleness:" + tool["name"], sql))
-        days = _days_since(_first_cell(r))
-        stale = gating.grade_staleness(days)
-        # blast
-        r, sql = await craft.nl_query(queries.dependents_for(tool["name"], tool["system"]),
-                                      config.DEPS_CONNECTION, config.DEPS_SCHEMA_NAME, config.DEPS_SCHEMA_FQN)
-        log.append(("dependents:" + tool["name"], sql))
-        blast = gating.grade_blast(_first_int(r))
-        # health
-        r, sql = await craft.nl_query(queries.health_for(tool["name"]),
-                                      config.GITHUB_CONNECTION, config.GITHUB_SCHEMA_NAME, config.GITHUB_SCHEMA_FQN)
-        log.append(("health:" + tool["name"], sql))
-        stars, issues, has_repo = _health_cells(r, tool.get("stars"))
-        health = gating.grade_health(stars, issues, has_repo)
-        # identity
-        r, sql = await craft.nl_query(queries.identity_check(tool["name"]),
-                                      config.DEPS_CONNECTION, config.DEPS_SCHEMA_NAME, config.DEPS_SCHEMA_FQN)
-        log.append(("identity:" + tool["name"], sql))
-        squat = _looks_like_squat(r)
-        identity = gating.grade_identity(squat)
+        try:
+            # CVE
+            r, sql = await craft.nl_query(queries.advisories_for(tool["name"]),
+                                          config.DEPS_CONNECTION, config.DEPS_SCHEMA_NAME, config.DEPS_SCHEMA_FQN)
+            log.append(("advisories:" + tool["name"], sql))
+            counts = {"CRITICAL": 0, "HIGH": 0, "MODERATE": 0}
+            worst = None
+            for row in _rows(r):
+                sev = str(row[2]).upper() if len(row) > 2 else "UNKNOWN"
+                if sev in counts:
+                    counts[sev] += 1
+                if len(row) > 1:
+                    try:
+                        cv = float(row[1])
+                        worst = cv if worst is None else max(worst, cv)
+                    except (TypeError, ValueError):
+                        pass
+            cve = gating.grade_cve(counts, worst)
+            has_cve = cve["verdict"] in ("RED", "YELLOW")
+            # capability (from classification)
+            cap = gating.grade_capability(tool.get("capabilities", []), has_cve)
+            # staleness
+            r, sql = await craft.nl_query(queries.staleness_for(tool["name"], tool["system"]),
+                                          config.DEPS_CONNECTION, config.DEPS_SCHEMA_NAME, config.DEPS_SCHEMA_FQN)
+            log.append(("staleness:" + tool["name"], sql))
+            days = _days_since(_first_cell(r))
+            stale = gating.grade_staleness(days)
+            # blast
+            r, sql = await craft.nl_query(queries.dependents_for(tool["name"], tool["system"]),
+                                          config.DEPS_CONNECTION, config.DEPS_SCHEMA_NAME, config.DEPS_SCHEMA_FQN)
+            log.append(("dependents:" + tool["name"], sql))
+            blast = gating.grade_blast(_first_int(r))
+            # health
+            r, sql = await craft.nl_query(queries.health_for(tool["name"]),
+                                          config.GITHUB_CONNECTION, config.GITHUB_SCHEMA_NAME, config.GITHUB_SCHEMA_FQN)
+            log.append(("health:" + tool["name"], sql))
+            stars, issues, has_repo = _health_cells(r, tool.get("stars"))
+            health = gating.grade_health(stars, issues, has_repo)
+            # identity
+            r, sql = await craft.nl_query(queries.identity_check(tool["name"]),
+                                          config.DEPS_CONNECTION, config.DEPS_SCHEMA_NAME, config.DEPS_SCHEMA_FQN)
+            log.append(("identity:" + tool["name"], sql))
+            squat = _looks_like_squat(r)
+            identity = gating.grade_identity(squat)
 
-        signals = {"cve": cve, "capability": cap, "staleness": stale,
-                   "blast": blast, "health": health, "identity": identity}
-        graded.append({**tool, "signals": signals,
-                       "verdict": gating.composite(signals), "sql_log": log})
-    return {"tools": graded}
+            signals = {"cve": cve, "capability": cap, "staleness": stale,
+                       "blast": blast, "health": health, "identity": identity}
+            graded.append({**tool, "signals": signals,
+                           "verdict": gating.composite(signals), "sql_log": log})
+        except Exception as exc:
+            errors.append(f"gate failed for {tool['name']}: {exc}")
+            graded.append({**tool, "signals": {"error": {"detail": f"gate failed: {exc}"}},
+                           "verdict": "YELLOW", "sql_log": log})
+    return {"tools": graded, "errors": errors}
 
 
 def _first_cell(r):

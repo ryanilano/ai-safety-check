@@ -70,6 +70,46 @@ def test_gate_node_handles_short_advisory_row_without_crashing():
     assert tool["signals"]["cve"]["verdict"] == "GREEN"
 
 
+class FakeCraftRaisesForTool:
+    """Raises for one named tool's advisories call, succeeds for others."""
+    def __init__(self, failing_name):
+        self.failing_name = failing_name
+
+    async def nl_query(self, question, connection, schema_name, schema_fqn, max_rows=200):
+        q = question.lower()
+        if self.failing_name.lower() in q and "advisor" in q:
+            raise RuntimeError("craft is down")
+        if "advisor" in q:
+            return ({"columns": ["Title", "CVSS3Score", "GitHubSeverity"], "rows": []},
+                     "SELECT ... advisories")
+        if "dependents" in q:
+            return ({"columns": ["c"], "rows": [[1]]}, "SELECT count dependents")
+        if "upstreampublishedat" in q:
+            return ({"columns": ["d", "v"], "rows": [["2023-07-17T00:00:00", 78]]}, "SELECT staleness")
+        if "projects" in q:
+            return ({"columns": ["StarsCount", "ForksCount", "OpenIssuesCount", "Licenses"],
+                     "rows": [[15000, 3000, 700, "Apache-2.0"]]}, "SELECT health")
+        return ({"columns": ["System", "v"], "rows": [["PYPI", 78]]}, "SELECT identity")
+
+
+def test_gate_node_isolates_per_tool_errors():
+    state = {"tools": [
+        {"name": "broken-tool", "system": "PYPI", "category": "OTHER",
+         "capabilities": [], "significance": "misc", "stars": 10, "sql_log": []},
+        {"name": "ok-tool", "system": "PYPI", "category": "OTHER",
+         "capabilities": [], "significance": "misc", "stars": 10, "sql_log": []},
+    ], "sql_log": []}
+    out = asyncio.run(nodes.gate_node(state, FakeCraftRaisesForTool("broken-tool")))
+    names = {t["name"] for t in out["tools"]}
+    assert names == {"broken-tool", "ok-tool"}
+    broken = next(t for t in out["tools"] if t["name"] == "broken-tool")
+    assert broken["verdict"] == "YELLOW"
+    ok = next(t for t in out["tools"] if t["name"] == "ok-tool")
+    assert "verdict" in ok
+    assert out["errors"]
+    assert any("broken-tool" in e for e in out["errors"])
+
+
 from apps.ai_safety_check.graph import build_graph
 
 

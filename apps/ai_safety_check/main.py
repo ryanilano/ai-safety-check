@@ -35,6 +35,11 @@ def save_artifacts(state: dict, out_dir: str) -> None:
     with open(os.path.join(out_dir, "state.json"), "w") as f:
         json.dump(state, f, indent=2, default=str)
     with open(os.path.join(out_dir, "sql_queries.txt"), "w") as f:
+        pipeline_log = state.get("sql_log") or []
+        if pipeline_log:
+            f.write("-- pipeline-level queries\n")
+            for label, sql in pipeline_log:
+                f.write(f"-- {label}\n{sql}\n\n")
         for tool in state.get("tools", []):
             for label, sql in tool.get("sql_log", []):
                 f.write(f"-- {label}\n{sql}\n\n")

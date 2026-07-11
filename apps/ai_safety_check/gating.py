@@ -82,4 +82,6 @@ def grade_identity(suspected_squat: bool) -> dict:
 
 
 def composite(signals: dict) -> str:
+    if not signals:
+        return "GREEN"
     return _worst(*(s["verdict"] for s in signals.values()))

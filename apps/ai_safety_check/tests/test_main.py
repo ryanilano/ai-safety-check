@@ -18,3 +18,12 @@ def test_run_and_save_writes_artifacts(tmp_path):
     assert os.path.exists(os.path.join(out, "sql_queries.txt"))
     saved = json.load(open(os.path.join(out, "state.json")))
     assert saved["tools"][0]["verdict"] == "RED"
+
+
+def test_save_artifacts_includes_pipeline_level_sql(tmp_path):
+    state = {"sql_log": [("discover", "SELECT * FROM projects")], "tools": []}
+    out = str(tmp_path / "run")
+    main.save_artifacts(state, out)
+    content = open(os.path.join(out, "sql_queries.txt")).read()
+    assert "discover" in content
+    assert "SELECT * FROM projects" in content
