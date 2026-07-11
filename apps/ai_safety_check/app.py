@@ -70,20 +70,42 @@ st.html(
     'Red light, green light for self-hosted AI — the LLM / AI safety check.</div>'
 )
 
-# ── Ask the supply chain ──────────────────────────────────────────────────────
+# ── Ask the supply chain (llama-server-style chat box) ───────────────────────
 st.header("Ask the supply chain", anchor="ask")
-q = st.text_area("Ask the supply chain (plain English):",
-                 placeholder="Which AI agents execute code but have unpatched critical CVEs?",
-                 height=120)
-if q:
+st.markdown("""
+<style>
+[data-testid="stChatInput"] {
+  background-color: #242424;
+  border: 1px solid #3a3a3a;
+  border-radius: 24px;
+  padding: 14px 18px;
+  min-height: 96px;
+  align-items: flex-start;
+}
+[data-testid="stChatInput"] textarea {
+  font-size: 17px;
+}
+</style>
+""", unsafe_allow_html=True)
+with st.container():
+    submitted = st.chat_input(
+        "Type a message… e.g. Which AI agents execute code but have unpatched critical CVEs?")
+if submitted:
     from apps.ai_safety_check.craft_client import CraftClient
     craft = CraftClient()
-    result, sql = asyncio.run(craft.nl_query(
-        q, config.DEPS_CONNECTION, config.DEPS_SCHEMA_NAME, config.DEPS_SCHEMA_FQN))
-    st.dataframe({c: [r[i] for r in result.get("rows", [])]
-                  for i, c in enumerate(result.get("columns", []))})
+    with st.spinner("Translating to SQL and querying deps.dev…"):
+        result, sql = asyncio.run(craft.nl_query(
+            submitted, config.DEPS_CONNECTION, config.DEPS_SCHEMA_NAME, config.DEPS_SCHEMA_FQN))
+    st.session_state["ask"] = {
+        "q": submitted, "sql": sql,
+        "table": {c: [r[i] for r in result.get("rows", [])]
+                  for i, c in enumerate(result.get("columns", []))}}
+if st.session_state.get("ask"):
+    ask = st.session_state["ask"]
+    st.caption(f"“{ask['q']}”")
+    st.dataframe(ask["table"])
     with st.expander("Generated SQL", icon=":material/code:"):
-        st.code(sql, language="sql")
+        st.code(ask["sql"], language="sql")
 
 if not state:
     st.info("No cached run yet. Click **Re-run live** to generate one.",
