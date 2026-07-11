@@ -1,0 +1,98 @@
+-- advisories:autogpt
+
+
+-- staleness:autogpt
+SELECT 
+    MAX(TO_TIMESTAMP("UpstreamPublishedAt" / 1000000)) AS "MostRecentUpstreamPublishedAt",
+    COUNT(*) AS "TotalVersions"
+FROM "DEPS_DEV_V1"."DEPS_DEV_V1"."PACKAGEVERSIONS"
+WHERE "System" = 'PYPI' AND "Name" = 'autogpt'
+
+-- dependents:autogpt
+SELECT COUNT(DISTINCT "Dependent":"Name"::VARCHAR) AS DISTINCT_DEPENDENT_PACKAGES
+FROM "DEPS_DEV_V1"."DEPS_DEV_V1"."DEPENDENTS"
+WHERE "System" = 'PYPI'
+  AND "Name" = 'autogpt'
+
+-- health:autogpt
+SELECT "Name", "StarsCount", "ForksCount", "OpenIssuesCount", "Licenses"
+FROM DEPS_DEV_V1.DEPS_DEV_V1.PROJECTS
+WHERE LOWER("Name") LIKE '%autogpt%'
+ORDER BY "StarsCount" DESC
+LIMIT 5
+
+-- identity:autogpt
+
+
+-- advisories:mlflow
+SELECT DISTINCT
+    a."Title",
+    a."CVSS3Score",
+    a."GitHubSeverity"
+FROM "DEPS_DEV_V1"."DEPS_DEV_V1"."PACKAGEVERSIONS" pv,
+     LATERAL FLATTEN(INPUT => pv."Advisories") f
+JOIN "DEPS_DEV_V1"."DEPS_DEV_V1"."ADVISORIES" a
+  ON a."SourceID" = f.VALUE:"SourceID"::VARCHAR
+WHERE pv."Name" = 'mlflow'
+ORDER BY a."CVSS3Score" DESC NULLS LAST
+
+-- staleness:mlflow
+SELECT 
+    MAX(TO_TIMESTAMP("UpstreamPublishedAt" / 1000000)) AS "MostRecentUpstreamPublishedAt",
+    COUNT(DISTINCT "Version") AS "TotalVersions"
+FROM "DEPS_DEV_V1"."DEPS_DEV_V1"."PACKAGEVERSIONS"
+WHERE "System" = 'PYPI' AND "Name" = 'mlflow'
+
+-- dependents:mlflow
+SELECT COUNT(DISTINCT "Dependent":"Name"::VARCHAR) AS distinct_transitive_dependents
+FROM "DEPS_DEV_V1"."DEPS_DEV_V1"."DEPENDENTS"
+WHERE "Name" = 'mlflow'
+  AND "System" = 'PYPI'
+
+-- health:mlflow
+SELECT "Name", "StarsCount", "ForksCount", "OpenIssuesCount", "Licenses"
+FROM "DEPS_DEV_V1"."DEPS_DEV_V1"."PROJECTS"
+WHERE "Name" ILIKE '%mlflow%'
+ORDER BY "StarsCount" DESC
+LIMIT 5
+
+-- identity:mlflow
+SELECT "System", COUNT(*) AS "VersionCount"
+FROM "DEPS_DEV_V1"."DEPS_DEV_V1"."PACKAGEVERSIONS"
+WHERE "Name" = 'mlflow'
+GROUP BY "System"
+ORDER BY "System"
+
+-- advisories:anthropic
+
+
+-- staleness:anthropic
+SELECT
+    "Name",
+    "System",
+    TO_TIMESTAMP(MAX("UpstreamPublishedAt") / 1000000) AS "MostRecentUpstreamPublishedAt",
+    COUNT(*) AS "TotalVersions"
+FROM "DEPS_DEV_V1"."DEPS_DEV_V1"."PACKAGEVERSIONS"
+WHERE "Name" = 'anthropic'
+GROUP BY "Name", "System"
+
+-- dependents:anthropic
+SELECT COUNT(DISTINCT "Dependent":"Name"::VARCHAR) AS distinct_dependent_packages
+FROM "DEPS_DEV_V1"."DEPS_DEV_V1"."DEPENDENTS"
+WHERE "Name" = 'anthropic' AND "System" = 'PYPI'
+
+-- health:anthropic
+SELECT "Name", "StarsCount", "ForksCount", "OpenIssuesCount", "Licenses"
+FROM DEPS_DEV_V1.DEPS_DEV_V1."PROJECTS"
+WHERE LOWER("Name") LIKE '%anthropic%'
+ORDER BY "StarsCount" DESC
+LIMIT 5
+
+-- identity:anthropic
+SELECT "System", COUNT(*) AS "VersionCount"
+FROM "DEPS_DEV_V1"."DEPS_DEV_V1"."PACKAGEVERSIONS"
+WHERE "Name" = 'anthropic'
+  AND "System" IN ('PYPI', 'NPM', 'MAVEN', 'CARGO', 'GO', 'NUGET')
+GROUP BY "System"
+ORDER BY "VersionCount" DESC
+
