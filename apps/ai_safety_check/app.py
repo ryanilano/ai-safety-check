@@ -44,11 +44,11 @@ state = st.session_state.get("state") or _latest_state()
 with st.sidebar:
     st.markdown("### Index")
     st.markdown(
+        "- [Ask the supply chain](#ask)\n"
         "- [Bad repos](#bad-repos)\n"
         "- [Leaderboard](#leaderboard)\n"
         "- [Case studies](#case-studies)\n"
-        "- [Common dangers](#common-dangers)\n"
-        "- [Ask the supply chain](#ask)"
+        "- [Common dangers](#common-dangers)"
     )
     st.markdown("### Controls")
     if st.button("Re-run live", icon=":material/refresh:"):
@@ -69,6 +69,20 @@ st.html(
     '<div style="font-size:22px;color:#8a919e;margin-bottom:0.6em">'
     'Red light, green light for self-hosted AI — the LLM / AI safety check.</div>'
 )
+
+# ── Ask the supply chain ──────────────────────────────────────────────────────
+st.header("Ask the supply chain", anchor="ask")
+q = st.text_input("Ask the supply chain (plain English):",
+                  placeholder="Which AI agents execute code but have unpatched critical CVEs?")
+if q:
+    from apps.ai_safety_check.craft_client import CraftClient
+    craft = CraftClient()
+    result, sql = asyncio.run(craft.nl_query(
+        q, config.DEPS_CONNECTION, config.DEPS_SCHEMA_NAME, config.DEPS_SCHEMA_FQN))
+    st.dataframe({c: [r[i] for r in result.get("rows", [])]
+                  for i, c in enumerate(result.get("columns", []))})
+    with st.expander("Generated SQL", icon=":material/code:"):
+        st.code(sql, language="sql")
 
 if not state:
     st.info("No cached run yet. Click **Re-run live** to generate one.",
@@ -131,17 +145,3 @@ if state.get("errors"):
     with st.expander("Run warnings", icon=":material/warning:"):
         for e in state["errors"]:
             st.caption(e)
-
-# ── Ask the supply chain ──────────────────────────────────────────────────────
-st.header("Ask the supply chain", anchor="ask")
-q = st.text_input("Ask the supply chain (plain English):",
-                  placeholder="Which AI agents execute code but have unpatched critical CVEs?")
-if q:
-    from apps.ai_safety_check.craft_client import CraftClient
-    craft = CraftClient()
-    result, sql = asyncio.run(craft.nl_query(
-        q, config.DEPS_CONNECTION, config.DEPS_SCHEMA_NAME, config.DEPS_SCHEMA_FQN))
-    st.dataframe({c: [r[i] for r in result.get("rows", [])]
-                  for i, c in enumerate(result.get("columns", []))})
-    with st.expander("Generated SQL", icon=":material/code:"):
-        st.code(sql, language="sql")
