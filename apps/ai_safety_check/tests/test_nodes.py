@@ -68,3 +68,34 @@ def test_gate_node_handles_short_advisory_row_without_crashing():
     tool = out["tools"][0]
     assert "verdict" in tool
     assert tool["signals"]["cve"]["verdict"] == "GREEN"
+
+
+from apps.ai_safety_check.graph import build_graph
+
+
+class FakeLLM:
+    def complete(self, prompt, json_mode=False):
+        if "recurring supply-chain danger" in prompt:
+            return '[{"pattern":"executes code","seen_in":["autogpt"],"remediation":"sandbox it"}]'
+        if "triaging" in prompt.lower() or "classification" in prompt.lower():
+            return '[{"name":"mlflow","category":"INFERENCE_SERVER","capabilities":["exposes_server"],"significance":"ml platform"}]'
+        return "summary"
+
+
+class FakeTavily:
+    def search(self, q): return [{"title": "t", "url": "http://x", "content": "exploited"}]
+
+
+def test_graph_runs_end_to_end():
+    craft = FakeCraft()
+    # discover returns one project row:
+    async def nl_query(question, connection, schema_name, schema_fqn, max_rows=200):
+        if "most-starred" in question:
+            return ({"columns": ["ProjectName", "ProjectType", "StarsCount"],
+                     "rows": [["org/mlflow", "GITHUB", 15000]]}, "SELECT discover")
+        return await FakeCraft().nl_query(question, connection, schema_name, schema_fqn, max_rows)
+    craft.nl_query = nl_query
+    graph = build_graph(craft, FakeLLM(), FakeTavily())
+    out = asyncio.run(graph.ainvoke({"sql_log": []}))
+    assert out["tools"][0]["verdict"] == "RED"
+    assert out["dangers"][0]["pattern"]
