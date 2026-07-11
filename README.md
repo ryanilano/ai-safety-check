@@ -9,7 +9,7 @@ Built for the Nebius × Emergence hackathon — Scenario 5: Software Supply Chai
 ---
 
 We're all installing AI tools as fast as they ship — agents, MCPs, whatever hit the front page this week — with zero idea if they're safe to run. **LLM / AI Safety Check** gates them: six data-backed signals per tool, worst-signal-wins, a 🔴 RED / 🟡 YELLOW / 🟢 GREEN verdict — with the evidence, the SQL query that produced it, and the fix.
-
+CHECK IT OUT LIVE HERE: https://ai-safety-check-79hkfz9cpbhk9m82wpzpgr.streamlit.app/
 ** Ask what the latest greatest AI/LLM tools are... get an evidence backed security audit!
 
 ## The hook: hindsight as a feature
