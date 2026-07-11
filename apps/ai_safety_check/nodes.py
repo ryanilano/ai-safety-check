@@ -53,11 +53,12 @@ async def gate_node(state, craft) -> dict:
             sev = str(row[2]).upper() if len(row) > 2 else "UNKNOWN"
             if sev in counts:
                 counts[sev] += 1
-            try:
-                cv = float(row[1])
-                worst = cv if worst is None else max(worst, cv)
-            except (TypeError, ValueError):
-                pass
+            if len(row) > 1:
+                try:
+                    cv = float(row[1])
+                    worst = cv if worst is None else max(worst, cv)
+                except (TypeError, ValueError):
+                    pass
         cve = gating.grade_cve(counts, worst)
         has_cve = cve["verdict"] in ("RED", "YELLOW")
         # capability (from classification)
