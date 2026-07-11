@@ -65,9 +65,9 @@ with st.sidebar:
 # ── Giant copy (top) ──────────────────────────────────────────────────────────
 st.html(
     '<div style="font-size:72px;font-weight:800;line-height:1.05;'
-    'letter-spacing:-0.02em;margin-bottom:0.15em">🔴🟡🟢 Would you<br>run this on your laptop?</div>'
+    'letter-spacing:-0.02em;margin-bottom:0.15em">🔴🟡🟢 AI/LLM Safety Tests</div>'
     '<div style="font-size:22px;color:#8a919e;margin-bottom:0.6em">'
-    'Red light, green light for self-hosted AI — the LLM / AI safety check.</div>'
+    'Red light, green light for self-hosted AI — would you run this on your laptop?</div>'
 )
 
 # ── Ask the supply chain (llama-server-style chat box) ───────────────────────
