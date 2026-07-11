@@ -44,7 +44,7 @@ state = st.session_state.get("state") or _latest_state()
 with st.sidebar:
     st.markdown("### Index")
     st.markdown(
-        "- [Ask the supply chain](#ask)\n"
+        "- [Use natural language](#ask)\n"
         "- [Bad repos](#bad-repos)\n"
         "- [Leaderboard](#leaderboard)\n"
         "- [Case studies](#case-studies)\n"
@@ -70,8 +70,8 @@ st.html(
     'Red light, green light for self-hosted AI — would you run this on your laptop?</div>'
 )
 
-# ── Ask the supply chain (llama-server-style chat box) ───────────────────────
-st.header("Ask the supply chain", anchor="ask")
+# ── Natural-language ask box (llama-server-style chat box) ───────────────────
+st.header("Use natural language", anchor="ask")
 st.markdown("""
 <style>
 [data-testid="stChatInput"] {
@@ -95,7 +95,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 with st.container():
     submitted = st.chat_input(
-        "What's popular that has major issues?  ·  Is Claude Code safe?")
+        "Lookin' for agents?  ·  What's the best MCP right now?")
 if submitted:
     from apps.ai_safety_check.craft_client import CraftClient
     craft = CraftClient()
