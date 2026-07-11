@@ -1,0 +1,183 @@
+<title>AI/LLM Safety Tests</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #161618; --surface: #202023; --surface2: #26262a; --border: #35353b;
+    --text: #e7e7ea; --muted: #9c9ca6;
+    --red: #f28b82; --yellow: #fdd663; --green: #81c995; --link: #8ab4f8;
+  }
+  html { background: var(--bg); }
+  body {
+    background: var(--bg); color: var(--text);
+    font: 400 16px/1.55 -apple-system, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+    margin: 0; padding: 48px 24px 80px;
+  }
+  main { max-width: 1060px; margin: 0 auto; display: flex; flex-direction: column; gap: 40px; }
+  a { color: var(--link); text-decoration: none; }
+  a:hover, a:focus-visible { text-decoration: underline; }
+  a:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; border-radius: 3px; }
+  .hero h1 {
+    font-size: clamp(40px, 7vw, 68px); font-weight: 800; letter-spacing: -0.02em;
+    line-height: 1.04; margin: 0 0 10px; text-wrap: balance;
+  }
+  .hero p { font-size: 20px; color: var(--muted); margin: 0; max-width: 46em; }
+  .tl { letter-spacing: 2px; }
+  h2 { font-size: 26px; font-weight: 650; letter-spacing: -0.01em; margin: 0 0 16px; }
+  .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+  .metric {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+    padding: 14px 18px;
+  }
+  .metric .n { font-size: 34px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .metric .l { font-size: 12.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .metric.red .n { color: var(--red); } .metric.yellow .n { color: var(--yellow); }
+  .metric.green .n { color: var(--green); }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+  .card, .case {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 18px;
+    padding: 18px 20px;
+  }
+  .card h3, .case h3 { margin: 0 0 4px; font-size: 19px; font-weight: 650; }
+  .cat { color: var(--muted); font-size: 14px; margin: 0 0 10px; }
+  .dot.red { color: var(--red); } .dot.yellow { color: var(--yellow); } .dot.green { color: var(--green); }
+  .badges { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+  .badge {
+    font-size: 12.5px; font-weight: 600; padding: 3px 10px; border-radius: 999px;
+    border: 1px solid var(--border); background: var(--surface2);
+  }
+  .badge.red { color: var(--red); } .badge.yellow { color: var(--yellow); }
+  .pill {
+    font-size: 12px; font-weight: 700; letter-spacing: 0.04em; padding: 3px 10px;
+    border-radius: 999px; background: var(--surface2); border: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .pill.red { color: var(--red); } .pill.yellow { color: var(--yellow); } .pill.green { color: var(--green); }
+  .tablewrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 18px; }
+  table { border-collapse: collapse; width: 100%; min-width: 720px; font-size: 14.5px; }
+  th {
+    text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: 0.07em;
+    color: var(--muted); padding: 12px 14px; background: var(--surface);
+  }
+  td { padding: 11px 14px; border-top: 1px solid var(--border); vertical-align: top; }
+  td.name { font-weight: 650; white-space: nowrap; }
+  td.cat { color: var(--muted); white-space: nowrap; }
+  .cases { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+  .case ul { margin: 8px 0 12px; padding-left: 0; list-style: none; display: flex; flex-direction: column; gap: 5px; font-size: 14px; }
+  .case .k {
+    display: inline-block; min-width: 86px; color: var(--muted); font-size: 12px;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .hind { font-size: 14px; margin: 0; color: var(--text); }
+  .dangers li { margin-bottom: 14px; }
+  .dangers .seen { color: var(--muted); font-size: 13px; margin-left: 8px; }
+  footer { color: var(--muted); font-size: 13.5px; border-top: 1px solid var(--border); padding-top: 18px; }
+</style>
+<main>
+  <header class="hero">
+    <h1><span class="tl">🔴🟡🟢</span> AI/LLM Safety Tests</h1>
+    <p>Red light, green light for self-hosted AI — would you run this on your laptop?
+       Six supply-chain signals per tool, graded live from deps.dev via CRAFT text-to-SQL,
+       with post-2023 hindsight from the web.</p>
+  </header>
+
+  <section class="metrics">
+    <div class="metric"><div class="n">14</div><div class="l">Tools graded</div></div>
+    <div class="metric red"><div class="n">4</div><div class="l">Red — don't run</div></div>
+    <div class="metric yellow"><div class="n">10</div><div class="l">Yellow — caution</div></div>
+    <div class="metric green"><div class="n">0</div><div class="l">Green — go</div></div>
+    <div class="metric red"><div class="n">16</div><div class="l">Critical advisories</div></div>
+  </section>
+
+  <section>
+    <h2>🚨 Bad repos</h2>
+    <div class="cards">
+    <article class="card">
+      <h3><span class="dot red">●</span> mlflow</h3>
+      <p class="cat">INFERENCE_SERVER — ML lifecycle platform commonly self-hosted</p>
+      <div class="badges"><span class="badge red">5 CRITICAL / 2 HIGH / 0 MODERATE advisories; worst CVSS 10.0</span></div>
+      <p class="hind"><strong>What happened next:</strong> MLflow disclosed multiple critical vulnerabilities in early 2026. <a href="https://app.opencve.io/cve?page=2&amp;product=mlflow&amp;vendor=lfprojects" rel="noopener">source</a></p>
+    </article>
+    <article class="card">
+      <h3><span class="dot red">●</span> anthropic</h3>
+      <p class="cat">GATEWAY — vendor-name package; squat-check showcase</p>
+      <div class="badges"><span class="badge red">0 CRITICAL / 0 HIGH / 0 MODERATE advisories</span><span class="badge yellow">suspected squat / name-confusion package</span></div>
+      <p class="hind"><strong>What happened next:</strong> Anthropic patched Claude Code RCE bug after discovery. <a href="https://www.sentinelone.com/vulnerability-database/cve-2025-59536" rel="noopener">source</a></p>
+    </article>
+    <article class="card">
+      <h3><span class="dot red">●</span> langchain</h3>
+      <p class="cat">ORCHESTRATION — dominant LLM orchestration framework</p>
+      <div class="badges"><span class="badge red">10 CRITICAL / 1 HIGH / 1 MODERATE advisories; worst CVSS 9.8</span></div>
+      <p class="hind"><strong>What happened next:</strong> LangChain suffered multiple critical vulnerabilities disclosed 2024‑2026. <a href="https://labs.cloudsecurityalliance.org/research/csa-research-note-langchain-langgraph-vulnerabilities-202603" rel="noopener">source</a></p>
+    </article>
+    <article class="card">
+      <h3><span class="dot red">●</span> llama-index</h3>
+      <p class="cat">ORCHESTRATION — RAG framework connecting LLMs to data</p>
+      <div class="badges"><span class="badge red">1 CRITICAL / 0 HIGH / 0 MODERATE advisories; worst CVSS 9.8</span></div>
+      <p class="hind"><strong>What happened next:</strong> Critical SQLi vulnerability discovered and patched in LlamaIndex. <a href="https://www.endorlabs.com/learn/critical-sql-injection-vulnerability-in-llamaindex-cve-2025-1793---advisory-and-analysis" rel="noopener">source</a></p>
+    </article>
+    </div>
+  </section>
+
+  <section>
+    <h2>Leaderboard</h2>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Verdict</th><th>Tool</th><th>Category</th><th>Significance</th><th>What happened next</th></tr></thead>
+        <tbody><tr><td><span class="pill yellow">YELLOW</span></td><td class='name'>autogpt</td><td class='cat'>AGENT</td><td>autonomous LLM agent that executes its own plans</td><td>AutoGPT had a DoS vulnerability disclosed in 2025. <a href="https://www.sentinelone.com/vulnerability-database/cve-2025-32423" rel="noopener">source</a></td></tr>
+<tr><td><span class="pill red">RED</span></td><td class='name'>mlflow</td><td class='cat'>INFERENCE_SERVER</td><td>ML lifecycle platform commonly self-hosted</td><td>MLflow disclosed multiple critical vulnerabilities in early 2026. <a href="https://app.opencve.io/cve?page=2&amp;product=mlflow&amp;vendor=lfprojects" rel="noopener">source</a></td></tr>
+<tr><td><span class="pill red">RED</span></td><td class='name'>anthropic</td><td class='cat'>GATEWAY</td><td>vendor-name package; squat-check showcase</td><td>Anthropic patched Claude Code RCE bug after discovery. <a href="https://www.sentinelone.com/vulnerability-database/cve-2025-59536" rel="noopener">source</a></td></tr>
+<tr><td><span class="pill red">RED</span></td><td class='name'>langchain</td><td class='cat'>ORCHESTRATION</td><td>dominant LLM orchestration framework</td><td>LangChain suffered multiple critical vulnerabilities disclosed 2024‑2026. <a href="https://labs.cloudsecurityalliance.org/research/csa-research-note-langchain-langgraph-vulnerabilities-202603" rel="noopener">source</a></td></tr>
+<tr><td><span class="pill yellow">YELLOW</span></td><td class='name'>ollama</td><td class='cat'>INFERENCE_SERVER</td><td>local LLM runner</td><td>Ollama v0.5.11 DoS vulnerability via malicious model download <a href="https://www.sentinelone.com/vulnerability-database/cve-2025-1975" rel="noopener">source</a></td></tr>
+<tr><td><span class="pill yellow">YELLOW</span></td><td class='name'>gradio</td><td class='cat'>INFERENCE_SERVER</td><td>ML demo UI server (hosts public shares)</td><td>Gradio CVE-2024-10569 updated with SSVC details 2025-2026. <a href="https://nvd.nist.gov/vuln/detail/CVE-2024-10569" rel="noopener">source</a></td></tr>
+<tr><td><span class="pill yellow">YELLOW</span></td><td class='name'>chromadb</td><td class='cat'>VECTOR_DB</td><td>popular embedded vector database</td><td>Critical unpatched RCE vulnerability affects ChromaDB v1.0.0-1.5.8 <a href="https://labs.cloudsecurityalliance.org/wp-content/uploads/2026/05/CSA_research_note_chromadb_rce_ai_infrastructure_security_20260521-csa-styled.pdf" rel="noopener">source</a></td></tr>
+<tr><td><span class="pill yellow">YELLOW</span></td><td class='name'>litellm</td><td class='cat'>GATEWAY</td><td>multi-provider LLM gateway/proxy</td><td>CVE-2024-9606 for litellm updated mid-2026 with SSVC details. <a href="https://nvd.nist.gov/vuln/detail/CVE-2024-9606" rel="noopener">source</a></td></tr>
+<tr><td><span class="pill red">RED</span></td><td class='name'>llama-index</td><td class='cat'>ORCHESTRATION</td><td>RAG framework connecting LLMs to data</td><td>Critical SQLi vulnerability discovered and patched in LlamaIndex. <a href="https://www.endorlabs.com/learn/critical-sql-injection-vulnerability-in-llamaindex-cve-2025-1793---advisory-and-analysis" rel="noopener">source</a></td></tr>
+<tr><td><span class="pill yellow">YELLOW</span></td><td class='name'>chatgpt</td><td class='cat'>GATEWAY</td><td>A lightweight Python library that simplifies calling the OpenAI ChatGPT API.</td><td>ChatGPT disclosed privilege/authorization vulnerability after mid-2023. <a href="https://nvd.nist.gov/vuln/detail/cve-2025-2320" rel="noopener">source</a></td></tr>
+<tr><td><span class="pill yellow">YELLOW</span></td><td class='name'>visual-chatgpt</td><td class='cat'>INFERENCE_SERVER</td><td>Visual ChatGPT combines visual foundation models with ChatGPT to enable multimodal reasoning via a Gradio demo server.</td><td>Post‑mid‑2023, Visual ChatGPT revealed privilege/authorization flaw (CVE‑2025‑2320). <a href="https://nvd.nist.gov/vuln/detail/cve-2025-2320" rel="noopener">source</a></td></tr>
+<tr><td><span class="pill yellow">YELLOW</span></td><td class='name'>stablediffusion</td><td class='cat'>INFERENCE_SERVER</td><td>Stable Diffusion repo offers code to run the text‑to‑image model, often serving via a web UI for image generation.</td><td>Vulnerability found allowing privilege escalation via insecure permissions. <a href="https://nvd.nist.gov/vuln/detail/CVE-2025-45468" rel="noopener">source</a></td></tr>
+<tr><td><span class="pill yellow">YELLOW</span></td><td class='name'>agentgpt</td><td class='cat'>AGENT</td><td>AgentGPT is a web‑based platform for creating and running autonomous AI agents that can use tools and execute code.</td><td>Source gives no details on AgentGPT after mid‑2023. <a href="https://nsfocusglobal.com/protecting-ai-security-2025-hot-security-incident" rel="noopener">source</a></td></tr>
+<tr><td><span class="pill yellow">YELLOW</span></td><td class='name'>gpt-sovits</td><td class='cat'>INFERENCE_SERVER</td><td>GPT‑SoVITS combines GPT and SoVITS for high‑quality voice cloning, exposing an inference server for TTS synthesis.</td><td>Source lacks post-mid-2023 event details <a href="https://www.endorlabs.com/vulnerability/cve-2025-49838" rel="noopener">source</a></td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Case studies</h2>
+    <div class="cases">
+    <article class="case">
+      <h3><span class="dot red">●</span> mlflow
+        <span class="pill red">RED</span></h3>
+      <p class="cat">ML lifecycle platform commonly self-hosted</p>
+      <ul><li><span class='k'>cve</span> 5 CRITICAL / 2 HIGH / 0 MODERATE advisories; worst CVSS 10.0</li><li><span class='k'>capability</span> capabilities: exposes_server, loads_pickled_models</li><li><span class='k'>staleness</span> last release 13 days ago</li><li><span class='k'>blast</span> 0 downstream dependents</li><li><span class='k'>health</span> 15665 stars / 1229 open issues</li><li><span class='k'>identity</span> identity looks legitimate</li></ul>
+      <p class="hind"><strong>What actually happened:</strong> MLflow disclosed multiple critical vulnerabilities in early 2026. <a href="https://app.opencve.io/cve?page=2&amp;product=mlflow&amp;vendor=lfprojects" rel="noopener">source</a></p>
+    </article>
+    <article class="case">
+      <h3><span class="dot yellow">●</span> autogpt
+        <span class="pill yellow">YELLOW</span></h3>
+      <p class="cat">autonomous LLM agent that executes its own plans</p>
+      <ul><li><span class='k'>cve</span> 0 CRITICAL / 0 HIGH / 0 MODERATE advisories</li><li><span class='k'>capability</span> capabilities: executes_code, accesses_network</li><li><span class='k'>staleness</span> no release date available</li><li><span class='k'>blast</span> 0 downstream dependents</li><li><span class='k'>health</span> 164209 stars / 114 open issues</li><li><span class='k'>identity</span> identity looks legitimate</li></ul>
+      <p class="hind"><strong>What actually happened:</strong> AutoGPT had a DoS vulnerability disclosed in 2025. <a href="https://www.sentinelone.com/vulnerability-database/cve-2025-32423" rel="noopener">source</a></p>
+    </article>
+    <article class="case">
+      <h3><span class="dot red">●</span> anthropic
+        <span class="pill red">RED</span></h3>
+      <p class="cat">vendor-name package; squat-check showcase</p>
+      <ul><li><span class='k'>cve</span> 0 CRITICAL / 0 HIGH / 0 MODERATE advisories</li><li><span class='k'>capability</span> capabilities: accesses_network</li><li><span class='k'>staleness</span> last release 2200 days ago (&gt;2y)</li><li><span class='k'>blast</span> 1 downstream dependents</li><li><span class='k'>health</span> 24 stars / 0 open issues</li><li><span class='k'>identity</span> suspected squat / name-confusion package</li></ul>
+      <p class="hind"><strong>What actually happened:</strong> Anthropic patched Claude Code RCE bug after discovery. <a href="https://www.sentinelone.com/vulnerability-database/cve-2025-59536" rel="noopener">source</a></p>
+    </article>
+    </div>
+  </section>
+
+  <section class="dangers">
+    <h2>Common dangers</h2>
+    <ul><li><strong>Unrestricted code execution with network access</strong><span class='seen'>seen in autogpt, langchain, llama-index</span><br>Run code in a sandboxed environment and disable outbound network unless explicitly required.</li><li><strong>Exposure of server endpoints without authentication</strong><span class='seen'>seen in mlflow, ollama, gradio, chromadb</span><br>Enforce authentication, use API gateways, and restrict server binding to trusted interfaces.</li><li><strong>Deserialization of untrusted pickle data leading to arbitrary code execution</strong><span class='seen'>seen in mlflow</span><br>Replace pickle with safe serialization formats (e.g., JSON) and validate all incoming data before deserialization.</li><li><strong>Handling of credentials combined with network communication</strong><span class='seen'>seen in litellm</span><br>Store credentials in a secret manager, use short-lived tokens, and ensure all network traffic is encrypted.</li></ul>
+  </section>
+
+  <footer>
+    Signals: CVE load · dangerous capability · staleness · blast radius · upstream health ·
+    identity trust. Data: deps.dev public snapshot (≈ mid-2023) queried in natural language
+    through the CRAFT MCP semantic layer; verdict synthesis by Nemotron via Nebius Token
+    Factory; hindsight via Tavily web search. Blast-radius “0 dependents” can mean sparse
+    snapshot coverage rather than verified low risk. Built for the Nebius × Emergence hackathon.
+  </footer>
+</main>
