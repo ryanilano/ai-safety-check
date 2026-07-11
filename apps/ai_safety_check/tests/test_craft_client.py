@@ -1,3 +1,4 @@
+import asyncio
 import os
 
 # config.py validates required env vars at import time — set fakes before
@@ -44,3 +45,30 @@ def test_extract_result_wraps_non_dict_response():
     out = CraftClient._extract_result("execute_query", event)
     assert out["ok"] is False
     assert out["error"]["code"] == "non_dict_response"
+
+
+def test_execute_query_returns_positional_list_of_lists(monkeypatch):
+    # execute_query() calls self.call(...) twice — once for "execute_query"
+    # (to get artifact_fqn/row_count) and once for "get_result_page" (to get
+    # the actual rows). Patch that seam so no HTTP happens.
+    canned_columns = ["Title", "CVSS3Score", "GitHubSeverity"]
+    canned_rows = [["path traversal", 10.0, "CRITICAL"]]
+
+    async def fake_call(self, tool: str, arguments: dict):
+        if tool == "execute_query":
+            return {
+                "ok": True,
+                "execute_query": {"artifact_fqn": "fake_artifact", "row_count": 1},
+            }
+        if tool == "get_result_page":
+            return {"preview": {"columns": canned_columns, "rows": canned_rows}}
+        raise AssertionError(f"unexpected tool call: {tool}")
+
+    monkeypatch.setattr(CraftClient, "call", fake_call)
+
+    c = CraftClient()
+    result = asyncio.run(c.execute_query("SELECT * FROM whatever", "deps_conn"))
+
+    assert result["columns"] == canned_columns
+    assert isinstance(result["rows"][0], list)
+    assert result["rows"][0][0] == "path traversal"

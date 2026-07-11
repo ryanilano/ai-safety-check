@@ -224,10 +224,12 @@ class CraftClient:
     async def execute_query(
         self, sql: str, connection: str, max_rows: int = config.QUERY_MAX_ROWS
     ) -> dict:
-        """Execute SQL and return rows as a list of dicts.
+        """Execute SQL and return rows as a positional list-of-lists.
 
         Internally calls execute_query MCP (gets artifact_fqn) then
-        get_result_page MCP (fetches actual rows). Callers see only rows.
+        get_result_page MCP (fetches actual rows). Rows are returned exactly
+        as CRAFT provides them (row[0], row[1], ...) — not converted to
+        column-name dicts — matching the raw get_result_page API shape.
         """
         exec_resp = await self.call("execute_query", {
             "sql":        sql,
@@ -262,9 +264,8 @@ class CraftClient:
             columns  = preview.get("columns", [])
             raw_rows = preview.get("rows", [])
             if raw_rows:
-                row_dicts = [dict(zip(columns, row)) for row in raw_rows]
-                log.debug(f"Converted {len(row_dicts)} rows using columns {columns}")
-                return {"ok": True, "rows": row_dicts, "columns": columns}
+                log.debug(f"Returning {len(raw_rows)} rows (positional) with columns {columns}")
+                return {"ok": True, "rows": raw_rows, "columns": columns}
 
         return {"ok": True, "rows": [], "columns": []}
 
