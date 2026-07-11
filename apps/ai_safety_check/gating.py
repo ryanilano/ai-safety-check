@@ -20,7 +20,8 @@ def grade_cve(counts: dict, worst_cvss: float | None) -> dict:
     detail = f"{crit} CRITICAL / {high} HIGH / {mod} MODERATE advisories"
     if worst_cvss is not None:
         detail += f"; worst CVSS {worst_cvss}"
-    return {"verdict": verdict, "detail": detail, "worst_cvss": worst_cvss, "counts": counts}
+    normalized = {"CRITICAL": crit, "HIGH": high, "MODERATE": mod}
+    return {"verdict": verdict, "detail": detail, "worst_cvss": worst_cvss, "counts": normalized}
 
 
 def grade_capability(flags: list[str], has_cve: bool) -> dict:

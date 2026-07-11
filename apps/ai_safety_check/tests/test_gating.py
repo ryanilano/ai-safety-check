@@ -12,6 +12,12 @@ def test_cve_none_is_green():
     assert r["verdict"] == "GREEN"
 
 
+def test_cve_counts_normalized_on_partial_input():
+    r = gating.grade_cve({"CRITICAL": 1}, worst_cvss=None)
+    assert r["counts"] == {"CRITICAL": 1, "HIGH": 0, "MODERATE": 0}
+    assert r["verdict"] == "RED"
+
+
 def test_capability_executes_code_plus_cve_is_red():
     r = gating.grade_capability(["executes_code"], has_cve=True)
     assert r["verdict"] == "RED"
