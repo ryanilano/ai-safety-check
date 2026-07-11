@@ -72,8 +72,9 @@ st.html(
 
 # ── Ask the supply chain ──────────────────────────────────────────────────────
 st.header("Ask the supply chain", anchor="ask")
-q = st.text_input("Ask the supply chain (plain English):",
-                  placeholder="Which AI agents execute code but have unpatched critical CVEs?")
+q = st.text_area("Ask the supply chain (plain English):",
+                 placeholder="Which AI agents execute code but have unpatched critical CVEs?",
+                 height=120)
 if q:
     from apps.ai_safety_check.craft_client import CraftClient
     craft = CraftClient()
