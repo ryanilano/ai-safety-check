@@ -59,7 +59,7 @@ from mcp.shared.auth import OAuthClientInformationFull, OAuthClientMetadata, OAu
 # Which cluster's MCP endpoint to hit, and which project you're scoped to.
 # Ask your host for the right PROJECT_ID (it changes when a cluster is recreated).
 MCP_URL: str = "https://nebius.emergence.ai/mcp"
-PROJECT_ID: str = "<Your Project Id>"
+PROJECT_ID: str = "cb6bf32f-f77a-4092-93d4-ca5762a4ebfe"
 
 # The natural-language question you want turned into SQL.
 QUESTION: str = "How many rows are in the largest table?"
@@ -67,7 +67,7 @@ QUESTION: str = "How many rows are in the largest table?"
 # A data connection ("slug") and the schema to run against. If you don't know
 # these yet, run once with --list-tools, then call `list_data_connections` and
 # `get_schema` (see discover_connection_and_schema() below) to find valid values.
-CONNECTION: str = "eval-thelook-ecommerce"
+CONNECTION: str = "thelook-ecommerce-cb6bf32f"
 SCHEMA_NAME: str = "THELOOK_ECOMMERCE"
 # The FQN scopes generate_sql. A 2-segment "{connection}.{DB}" FQN lets the agent
 # see every schema in that database — usually what you want.
