@@ -27,3 +27,13 @@ def test_parses_results():
     c = TavilyClient(api_key="k", http_post=fake_post)
     out = c.search("mlflow cve 2024")
     assert out[0]["url"] == "http://x"
+
+
+def test_malformed_items_do_not_raise():
+    def fake_post(url, json=None, timeout=None):
+        class R:
+            def raise_for_status(self): pass
+            def json(self): return {"results": ["not-a-dict"]}
+        return R()
+    c = TavilyClient(api_key="k", http_post=fake_post)
+    assert c.search("x") == []   # must not raise

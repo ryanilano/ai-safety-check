@@ -19,7 +19,7 @@ class TavilyClient:
                            timeout=15.0)
             r.raise_for_status()
             data = r.json()
+            return [{"title": x.get("title", ""), "url": x.get("url", ""),
+                     "content": x.get("content", "")} for x in data.get("results", [])]
         except Exception:
             return []
-        return [{"title": x.get("title", ""), "url": x.get("url", ""),
-                 "content": x.get("content", "")} for x in data.get("results", [])]
