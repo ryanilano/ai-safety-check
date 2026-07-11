@@ -1,0 +1,39 @@
+# llama-server-inspired neutral dark theme: near-black background, soft gray
+# text, big rounded surfaces (matches the llama.cpp web UI look).
+
+[theme]
+base = "dark"
+primaryColor = "#ececec"
+backgroundColor = "#181818"
+secondaryBackgroundColor = "#242424"
+codeBackgroundColor = "#1e1e1e"
+textColor = "#e3e3e3"
+linkColor = "#8ab4f8"
+borderColor = "#3a3a3a"
+showWidgetBorder = true
+showSidebarBorder = true
+baseRadius = "16px"
+buttonRadius = "full"
+font = "'Inter':https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+codeFont = "'JetBrains Mono':https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap"
+codeFontSize = "13px"
+codeTextColor = "#e3e3e3"
+baseFontSize = 15
+baseFontWeight = 400
+headingFontSizes = ["34px", "26px", "21px", "17px", "15px", "13px"]
+headingFontWeights = [700, 650, 600, 600, 500, 500]
+linkUnderline = false
+chartCategoricalColors = ["#8ab4f8", "#81c995", "#fdd663", "#f28b82", "#c58af9", "#78d9ec", "#fcad70"]
+
+blueColor = "#8ab4f8"
+greenColor = "#81c995"
+yellowColor = "#fdd663"
+redColor = "#f28b82"
+violetColor = "#c58af9"
+orangeColor = "#fcad70"
+
+[theme.sidebar]
+backgroundColor = "#1f1f1f"
+secondaryBackgroundColor = "#2a2a2a"
+codeBackgroundColor = "#1e1e1e"
+borderColor = "#333333"

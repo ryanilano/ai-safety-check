@@ -1,0 +1,285 @@
+{
+  "tools": [
+    {
+      "name": "autogpt",
+      "system": "PYPI",
+      "category": "AGENT",
+      "capabilities": [
+        "executes_code",
+        "accesses_network"
+      ],
+      "significance": "autonomous LLM agent that executes its own plans",
+      "stars": 164209,
+      "sql_log": [
+        [
+          "advisories:autogpt",
+          ""
+        ],
+        [
+          "staleness:autogpt",
+          "SELECT \n    MAX(TO_TIMESTAMP(\"UpstreamPublishedAt\" / 1000000)) AS \"MostRecentUpstreamPublishedAt\",\n    COUNT(*) AS \"TotalVersions\"\nFROM \"DEPS_DEV_V1\".\"DEPS_DEV_V1\".\"PACKAGEVERSIONS\"\nWHERE \"System\" = 'PYPI' AND \"Name\" = 'autogpt'"
+        ],
+        [
+          "dependents:autogpt",
+          "SELECT COUNT(DISTINCT \"Dependent\":\"Name\"::VARCHAR) AS DISTINCT_DEPENDENT_PACKAGES\nFROM \"DEPS_DEV_V1\".\"DEPS_DEV_V1\".\"DEPENDENTS\"\nWHERE \"System\" = 'PYPI'\n  AND \"Name\" = 'autogpt'"
+        ],
+        [
+          "health:autogpt",
+          "SELECT \"Name\", \"StarsCount\", \"ForksCount\", \"OpenIssuesCount\", \"Licenses\"\nFROM DEPS_DEV_V1.DEPS_DEV_V1.PROJECTS\nWHERE LOWER(\"Name\") LIKE '%autogpt%'\nORDER BY \"StarsCount\" DESC\nLIMIT 5"
+        ],
+        [
+          "identity:autogpt",
+          ""
+        ]
+      ],
+      "signals": {
+        "cve": {
+          "verdict": "GREEN",
+          "detail": "0 CRITICAL / 0 HIGH / 0 MODERATE advisories",
+          "worst_cvss": null,
+          "counts": {
+            "CRITICAL": 0,
+            "HIGH": 0,
+            "MODERATE": 0
+          }
+        },
+        "capability": {
+          "verdict": "YELLOW",
+          "detail": "capabilities: executes_code, accesses_network",
+          "flags": [
+            "executes_code",
+            "accesses_network"
+          ]
+        },
+        "staleness": {
+          "verdict": "YELLOW",
+          "detail": "no release date available",
+          "days_since_last_release": null
+        },
+        "blast": {
+          "verdict": "GREEN",
+          "detail": "0 downstream dependents",
+          "dependent_count": 0
+        },
+        "health": {
+          "verdict": "GREEN",
+          "detail": "164209 stars / 114 open issues",
+          "stars": 164209,
+          "open_issues": 114,
+          "has_repo": true
+        },
+        "identity": {
+          "verdict": "GREEN",
+          "detail": "identity looks legitimate",
+          "suspected_squat": false
+        }
+      },
+      "verdict": "YELLOW",
+      "hindsight": {
+        "tag": "AutoGPT had a DoS vulnerability disclosed in 2025.",
+        "source_url": "https://www.sentinelone.com/vulnerability-database/cve-2025-32423"
+      }
+    },
+    {
+      "name": "mlflow",
+      "system": "PYPI",
+      "category": "INFERENCE_SERVER",
+      "capabilities": [
+        "exposes_server",
+        "loads_pickled_models"
+      ],
+      "significance": "ML lifecycle platform commonly self-hosted",
+      "stars": 15665,
+      "sql_log": [
+        [
+          "advisories:mlflow",
+          "SELECT DISTINCT\n    a.\"Title\",\n    a.\"CVSS3Score\",\n    a.\"GitHubSeverity\"\nFROM \"DEPS_DEV_V1\".\"DEPS_DEV_V1\".\"PACKAGEVERSIONS\" pv,\n     LATERAL FLATTEN(INPUT => pv.\"Advisories\") f\nJOIN \"DEPS_DEV_V1\".\"DEPS_DEV_V1\".\"ADVISORIES\" a\n  ON a.\"SourceID\" = f.VALUE:\"SourceID\"::VARCHAR\nWHERE pv.\"Name\" = 'mlflow'\nORDER BY a.\"CVSS3Score\" DESC NULLS LAST"
+        ],
+        [
+          "staleness:mlflow",
+          "SELECT \n    MAX(TO_TIMESTAMP(\"UpstreamPublishedAt\" / 1000000)) AS \"MostRecentUpstreamPublishedAt\",\n    COUNT(DISTINCT \"Version\") AS \"TotalVersions\"\nFROM \"DEPS_DEV_V1\".\"DEPS_DEV_V1\".\"PACKAGEVERSIONS\"\nWHERE \"System\" = 'PYPI' AND \"Name\" = 'mlflow'"
+        ],
+        [
+          "dependents:mlflow",
+          "SELECT COUNT(DISTINCT \"Dependent\":\"Name\"::VARCHAR) AS distinct_transitive_dependents\nFROM \"DEPS_DEV_V1\".\"DEPS_DEV_V1\".\"DEPENDENTS\"\nWHERE \"Name\" = 'mlflow'\n  AND \"System\" = 'PYPI'"
+        ],
+        [
+          "health:mlflow",
+          "SELECT \"Name\", \"StarsCount\", \"ForksCount\", \"OpenIssuesCount\", \"Licenses\"\nFROM \"DEPS_DEV_V1\".\"DEPS_DEV_V1\".\"PROJECTS\"\nWHERE \"Name\" ILIKE '%mlflow%'\nORDER BY \"StarsCount\" DESC\nLIMIT 5"
+        ],
+        [
+          "identity:mlflow",
+          "SELECT \"System\", COUNT(*) AS \"VersionCount\"\nFROM \"DEPS_DEV_V1\".\"DEPS_DEV_V1\".\"PACKAGEVERSIONS\"\nWHERE \"Name\" = 'mlflow'\nGROUP BY \"System\"\nORDER BY \"System\""
+        ]
+      ],
+      "signals": {
+        "cve": {
+          "verdict": "RED",
+          "detail": "5 CRITICAL / 2 HIGH / 0 MODERATE advisories; worst CVSS 10.0",
+          "worst_cvss": 10.0,
+          "counts": {
+            "CRITICAL": 5,
+            "HIGH": 2,
+            "MODERATE": 0
+          }
+        },
+        "capability": {
+          "verdict": "YELLOW",
+          "detail": "capabilities: exposes_server, loads_pickled_models",
+          "flags": [
+            "exposes_server",
+            "loads_pickled_models"
+          ]
+        },
+        "staleness": {
+          "verdict": "GREEN",
+          "detail": "last release 13 days ago",
+          "days_since_last_release": 13
+        },
+        "blast": {
+          "verdict": "GREEN",
+          "detail": "0 downstream dependents",
+          "dependent_count": 0
+        },
+        "health": {
+          "verdict": "GREEN",
+          "detail": "15665 stars / 1229 open issues",
+          "stars": 15665,
+          "open_issues": 1229,
+          "has_repo": true
+        },
+        "identity": {
+          "verdict": "GREEN",
+          "detail": "identity looks legitimate",
+          "suspected_squat": false
+        }
+      },
+      "verdict": "RED",
+      "hindsight": {
+        "tag": "MLflow disclosed multiple critical vulnerabilities in early\u202f2026.",
+        "source_url": "https://app.opencve.io/cve?page=2&product=mlflow&vendor=lfprojects"
+      }
+    },
+    {
+      "name": "anthropic",
+      "system": "PYPI",
+      "category": "GATEWAY",
+      "capabilities": [
+        "accesses_network"
+      ],
+      "significance": "vendor-name package; squat-check showcase",
+      "stars": null,
+      "sql_log": [
+        [
+          "advisories:anthropic",
+          ""
+        ],
+        [
+          "staleness:anthropic",
+          "SELECT\n    \"Name\",\n    \"System\",\n    TO_TIMESTAMP(MAX(\"UpstreamPublishedAt\") / 1000000) AS \"MostRecentUpstreamPublishedAt\",\n    COUNT(*) AS \"TotalVersions\"\nFROM \"DEPS_DEV_V1\".\"DEPS_DEV_V1\".\"PACKAGEVERSIONS\"\nWHERE \"Name\" = 'anthropic'\nGROUP BY \"Name\", \"System\""
+        ],
+        [
+          "dependents:anthropic",
+          "SELECT COUNT(DISTINCT \"Dependent\":\"Name\"::VARCHAR) AS distinct_dependent_packages\nFROM \"DEPS_DEV_V1\".\"DEPS_DEV_V1\".\"DEPENDENTS\"\nWHERE \"Name\" = 'anthropic' AND \"System\" = 'PYPI'"
+        ],
+        [
+          "health:anthropic",
+          "SELECT \"Name\", \"StarsCount\", \"ForksCount\", \"OpenIssuesCount\", \"Licenses\"\nFROM DEPS_DEV_V1.DEPS_DEV_V1.\"PROJECTS\"\nWHERE LOWER(\"Name\") LIKE '%anthropic%'\nORDER BY \"StarsCount\" DESC\nLIMIT 5"
+        ],
+        [
+          "identity:anthropic",
+          "SELECT \"System\", COUNT(*) AS \"VersionCount\"\nFROM \"DEPS_DEV_V1\".\"DEPS_DEV_V1\".\"PACKAGEVERSIONS\"\nWHERE \"Name\" = 'anthropic'\n  AND \"System\" IN ('PYPI', 'NPM', 'MAVEN', 'CARGO', 'GO', 'NUGET')\nGROUP BY \"System\"\nORDER BY \"VersionCount\" DESC"
+        ]
+      ],
+      "signals": {
+        "cve": {
+          "verdict": "GREEN",
+          "detail": "0 CRITICAL / 0 HIGH / 0 MODERATE advisories",
+          "worst_cvss": null,
+          "counts": {
+            "CRITICAL": 0,
+            "HIGH": 0,
+            "MODERATE": 0
+          }
+        },
+        "capability": {
+          "verdict": "GREEN",
+          "detail": "capabilities: accesses_network",
+          "flags": [
+            "accesses_network"
+          ]
+        },
+        "staleness": {
+          "verdict": "RED",
+          "detail": "last release 2200 days ago (>2y)",
+          "days_since_last_release": 2200
+        },
+        "blast": {
+          "verdict": "GREEN",
+          "detail": "1 downstream dependents",
+          "dependent_count": 1
+        },
+        "health": {
+          "verdict": "GREEN",
+          "detail": "24 stars / 0 open issues",
+          "stars": 24,
+          "open_issues": 0,
+          "has_repo": true
+        },
+        "identity": {
+          "verdict": "RED",
+          "detail": "suspected squat / name-confusion package",
+          "suspected_squat": true
+        }
+      },
+      "verdict": "RED",
+      "hindsight": {
+        "tag": "Anthropic patched Claude Code RCE bug after discovery.",
+        "source_url": "https://www.sentinelone.com/vulnerability-database/cve-2025-59536"
+      }
+    }
+  ],
+  "candidates": [],
+  "coverage": {
+    "discovered": 3,
+    "note": "pinned-only run"
+  },
+  "errors": [],
+  "sql_log": [],
+  "cases": [
+    "mlflow",
+    "autogpt",
+    "anthropic"
+  ],
+  "dangers": [
+    {
+      "pattern": "executes_code",
+      "seen_in": [
+        "autogpt"
+      ],
+      "remediation": "Run any code execution in a tightly sandboxed environment with limited privileges."
+    },
+    {
+      "pattern": "accesses_network",
+      "seen_in": [
+        "autogpt",
+        "anthropic"
+      ],
+      "remediation": "Enforce outbound network controls and restrict connections to approved destinations only."
+    },
+    {
+      "pattern": "exposes_server",
+      "seen_in": [
+        "mlflow"
+      ],
+      "remediation": "Disable unnecessary service exposure and bind listeners to internal interfaces or localhost."
+    },
+    {
+      "pattern": "loads_pickled_models",
+      "seen_in": [
+        "mlflow"
+      ],
+      "remediation": "Avoid deserializing untrusted pickle data; use safe serialization formats instead."
+    }
+  ]
+}

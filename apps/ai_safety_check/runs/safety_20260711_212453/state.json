@@ -1,0 +1,763 @@
+{
+  "tools": [
+    {
+      "name": "autogpt",
+      "system": "PYPI",
+      "category": "AGENT",
+      "capabilities": [
+        "executes_code",
+        "accesses_network"
+      ],
+      "significance": "autonomous LLM agent that executes its own plans",
+      "stars": 164209,
+      "sql_log": [
+        [
+          "advisories:autogpt",
+          ""
+        ],
+        [
+          "staleness:autogpt",
+          "SELECT \n    MAX(TO_TIMESTAMP(\"UpstreamPublishedAt\" / 1000000)) AS \"MostRecentUpstreamPublishedAt\",\n    COUNT(*) AS \"TotalVersions\"\nFROM \"DEPS_DEV_V1\".\"DEPS_DEV_V1\".\"PACKAGEVERSIONS\"\nWHERE \"System\" = 'PYPI' AND \"Name\" = 'autogpt'"
+        ],
+        [
+          "dependents:autogpt",
+          "SELECT COUNT(DISTINCT \"Dependent\":\"Name\"::VARCHAR) AS DISTINCT_DEPENDENT_PACKAGES\nFROM \"DEPS_DEV_V1\".\"DEPS_DEV_V1\".\"DEPENDENTS\"\nWHERE \"System\" = 'PYPI'\n  AND \"Name\" = 'autogpt'"
+        ],
+        [
+          "health:autogpt",
+          "SELECT \"Name\", \"StarsCount\", \"ForksCount\", \"OpenIssuesCount\", \"Licenses\"\nFROM DEPS_DEV_V1.DEPS_DEV_V1.PROJECTS\nWHERE LOWER(\"Name\") LIKE '%autogpt%'\nORDER BY \"StarsCount\" DESC\nLIMIT 5"
+        ],
+        [
+          "identity:autogpt",
+          ""
+        ]
+      ],
+      "signals": {
+        "cve": {
+          "verdict": "GREEN",
+          "detail": "0 CRITICAL / 0 HIGH / 0 MODERATE advisories",
+          "worst_cvss": null,
+          "counts": {
+            "CRITICAL": 0,
+            "HIGH": 0,
+            "MODERATE": 0
+          }
+        },
+        "capability": {
+          "verdict": "YELLOW",
+          "detail": "capabilities: executes_code, accesses_network",
+          "flags": [
+            "executes_code",
+            "accesses_network"
+          ]
+        },
+        "staleness": {
+          "verdict": "YELLOW",
+          "detail": "no release date available",
+          "days_since_last_release": null
+        },
+        "blast": {
+          "verdict": "GREEN",
+          "detail": "0 downstream dependents",
+          "dependent_count": 0
+        },
+        "health": {
+          "verdict": "GREEN",
+          "detail": "164209 stars / 114 open issues",
+          "stars": 164209,
+          "open_issues": 114,
+          "has_repo": true
+        },
+        "identity": {
+          "verdict": "GREEN",
+          "detail": "identity looks legitimate",
+          "suspected_squat": false
+        }
+      },
+      "verdict": "YELLOW",
+      "hindsight": {
+        "tag": "AutoGPT had a DoS vulnerability disclosed in 2025.",
+        "source_url": "https://www.sentinelone.com/vulnerability-database/cve-2025-32423"
+      }
+    },
+    {
+      "name": "mlflow",
+      "system": "PYPI",
+      "category": "INFERENCE_SERVER",
+      "capabilities": [
+        "exposes_server",
+        "loads_pickled_models"
+      ],
+      "significance": "ML lifecycle platform commonly self-hosted",
+      "stars": 15665,
+      "sql_log": [
+        [
+          "advisories:mlflow",
+          "SELECT DISTINCT\n    a.\"Title\",\n    a.\"CVSS3Score\",\n    a.\"GitHubSeverity\"\nFROM \"DEPS_DEV_V1\".\"DEPS_DEV_V1\".\"PACKAGEVERSIONS\" pv,\n     LATERAL FLATTEN(INPUT => pv.\"Advisories\") f\nJOIN \"DEPS_DEV_V1\".\"DEPS_DEV_V1\".\"ADVISORIES\" a\n  ON a.\"SourceID\" = f.VALUE:\"SourceID\"::VARCHAR\nWHERE pv.\"Name\" = 'mlflow'\nORDER BY a.\"CVSS3Score\" DESC NULLS LAST"
+        ],
+        [
+          "staleness:mlflow",
+          "SELECT \n    MAX(TO_TIMESTAMP(\"UpstreamPublishedAt\" / 1000000)) AS \"MostRecentUpstreamPublishedAt\",\n    COUNT(DISTINCT \"Version\") AS \"TotalVersions\"\nFROM \"DEPS_DEV_V1\".\"DEPS_DEV_V1\".\"PACKAGEVERSIONS\"\nWHERE \"System\" = 'PYPI' AND \"Name\" = 'mlflow'"
+        ],
+        [
+          "dependents:mlflow",
+          "SELECT COUNT(DISTINCT \"Dependent\":\"Name\"::VARCHAR) AS distinct_transitive_dependents\nFROM \"DEPS_DEV_V1\".\"DEPS_DEV_V1\".\"DEPENDENTS\"\nWHERE \"Name\" = 'mlflow'\n  AND \"System\" = 'PYPI'"
+        ],
+        [
+          "health:mlflow",
+          "SELECT \"Name\", \"StarsCount\", \"ForksCount\", \"OpenIssuesCount\", \"Licenses\"\nFROM \"DEPS_DEV_V1\".\"DEPS_DEV_V1\".\"PROJECTS\"\nWHERE \"Name\" ILIKE '%mlflow%'\nORDER BY \"StarsCount\" DESC\nLIMIT 5"
+        ],
+        [
+          "identity:mlflow",
+          "SELECT \"System\", COUNT(*) AS \"VersionCount\"\nFROM \"DEPS_DEV_V1\".\"DEPS_DEV_V1\".\"PACKAGEVERSIONS\"\nWHERE \"Name\" = 'mlflow'\nGROUP BY \"System\"\nORDER BY \"System\""
+        ]
+      ],
+      "signals": {
+        "cve": {
+          "verdict": "RED",
+          "detail": "5 CRITICAL / 2 HIGH / 0 MODERATE advisories; worst CVSS 10.0",
+          "worst_cvss": 10.0,
+          "counts": {
+            "CRITICAL": 5,
+            "HIGH": 2,
+            "MODERATE": 0
+          }
+        },
+        "capability": {
+          "verdict": "YELLOW",
+          "detail": "capabilities: exposes_server, loads_pickled_models",
+          "flags": [
+            "exposes_server",
+            "loads_pickled_models"
+          ]
+        },
+        "staleness": {
+          "verdict": "GREEN",
+          "detail": "last release 13 days ago",
+          "days_since_last_release": 13
+        },
+        "blast": {
+          "verdict": "GREEN",
+          "detail": "0 downstream dependents",
+          "dependent_count": 0
+        },
+        "health": {
+          "verdict": "GREEN",
+          "detail": "15665 stars / 1229 open issues",
+          "stars": 15665,
+          "open_issues": 1229,
+          "has_repo": true
+        },
+        "identity": {
+          "verdict": "GREEN",
+          "detail": "identity looks legitimate",
+          "suspected_squat": false
+        }
+      },
+      "verdict": "RED",
+      "hindsight": {
+        "tag": "MLflow disclosed multiple critical vulnerabilities in early\u202f2026.",
+        "source_url": "https://app.opencve.io/cve?page=2&product=mlflow&vendor=lfprojects"
+      }
+    },
+    {
+      "name": "anthropic",
+      "system": "PYPI",
+      "category": "GATEWAY",
+      "capabilities": [
+        "accesses_network"
+      ],
+      "significance": "vendor-name package; squat-check showcase",
+      "stars": null,
+      "sql_log": [
+        [
+          "advisories:anthropic",
+          ""
+        ],
+        [
+          "staleness:anthropic",
+          "SELECT\n    \"Name\",\n    \"System\",\n    TO_TIMESTAMP(MAX(\"UpstreamPublishedAt\") / 1000000) AS \"MostRecentUpstreamPublishedAt\",\n    COUNT(*) AS \"TotalVersions\"\nFROM \"DEPS_DEV_V1\".\"DEPS_DEV_V1\".\"PACKAGEVERSIONS\"\nWHERE \"Name\" = 'anthropic'\nGROUP BY \"Name\", \"System\""
+        ],
+        [
+          "dependents:anthropic",
+          "SELECT COUNT(DISTINCT \"Dependent\":\"Name\"::VARCHAR) AS distinct_dependent_packages\nFROM \"DEPS_DEV_V1\".\"DEPS_DEV_V1\".\"DEPENDENTS\"\nWHERE \"Name\" = 'anthropic' AND \"System\" = 'PYPI'"
+        ],
+        [
+          "health:anthropic",
+          "SELECT \"Name\", \"StarsCount\", \"ForksCount\", \"OpenIssuesCount\", \"Licenses\"\nFROM DEPS_DEV_V1.DEPS_DEV_V1.\"PROJECTS\"\nWHERE LOWER(\"Name\") LIKE '%anthropic%'\nORDER BY \"StarsCount\" DESC\nLIMIT 5"
+        ],
+        [
+          "identity:anthropic",
+          "SELECT \"System\", COUNT(*) AS \"VersionCount\"\nFROM \"DEPS_DEV_V1\".\"DEPS_DEV_V1\".\"PACKAGEVERSIONS\"\nWHERE \"Name\" = 'anthropic'\n  AND \"System\" IN ('PYPI', 'NPM', 'MAVEN', 'CARGO', 'GO', 'NUGET')\nGROUP BY \"System\"\nORDER BY \"VersionCount\" DESC"
+        ]
+      ],
+      "signals": {
+        "cve": {
+          "verdict": "GREEN",
+          "detail": "0 CRITICAL / 0 HIGH / 0 MODERATE advisories",
+          "worst_cvss": null,
+          "counts": {
+            "CRITICAL": 0,
+            "HIGH": 0,
+            "MODERATE": 0
+          }
+        },
+        "capability": {
+          "verdict": "GREEN",
+          "detail": "capabilities: accesses_network",
+          "flags": [
+            "accesses_network"
+          ]
+        },
+        "staleness": {
+          "verdict": "RED",
+          "detail": "last release 2200 days ago (>2y)",
+          "days_since_last_release": 2200
+        },
+        "blast": {
+          "verdict": "GREEN",
+          "detail": "1 downstream dependents",
+          "dependent_count": 1
+        },
+        "health": {
+          "verdict": "GREEN",
+          "detail": "24 stars / 0 open issues",
+          "stars": 24,
+          "open_issues": 0,
+          "has_repo": true
+        },
+        "identity": {
+          "verdict": "RED",
+          "detail": "suspected squat / name-confusion package",
+          "suspected_squat": true
+        }
+      },
+      "verdict": "RED",
+      "hindsight": {
+        "tag": "Anthropic patched Claude Code RCE bug after discovery.",
+        "source_url": "https://www.sentinelone.com/vulnerability-database/cve-2025-59536"
+      }
+    },
+    {
+      "name": "langchain",
+      "system": "PYPI",
+      "category": "ORCHESTRATION",
+      "capabilities": [
+        "executes_code",
+        "accesses_network"
+      ],
+      "significance": "dominant LLM orchestration framework",
+      "stars": null,
+      "sql_log": [
+        [
+          "advisories:langchain",
+          "SELECT \n    a.\"Title\",\n    a.\"CVSS3Score\",\n    a.\"GitHubSeverity\"\nFROM \"DEPS_DEV_V1\".\"DEPS_DEV_V1\".\"ADVISORIES\" a,\n    LATERAL FLATTEN(INPUT => a.\"Packages\") pkg\nWHERE pkg.VALUE:\"Name\"::VARCHAR = 'langchain'\nORDER BY a.\"CVSS3Score\" DESC NULLS LAST"
+        ],
+        [
+          "staleness:langchain",
+          "SELECT \n    MAX(TO_TIMESTAMP(\"UpstreamPublishedAt\" / 1000000)) AS \"MostRecentUpstreamPublishedAt\",\n    COUNT(DISTINCT \"Version\") AS \"TotalVersions\"\nFROM DEPS_DEV_V1.DEPS_DEV_V1.PACKAGEVERSIONS\nWHERE \"Name\" = 'langchain'"
+        ],
+        [
+          "dependents:langchain",
+          "SELECT COUNT(DISTINCT \"Dependent\":\"Name\"::VARCHAR) AS DISTINCT_TRANSITIVE_DEPENDENTS\nFROM DEPS_DEV_V1.DEPS_DEV_V1.DEPENDENTS\nWHERE \"System\" = 'PYPI' AND \"Name\" = 'langchain'"
+        ],
+        [
+          "health:langchain",
+          "SELECT \"Name\", \"StarsCount\", \"ForksCount\", \"OpenIssuesCount\", \"Licenses\"\nFROM DEPS_DEV_V1.DEPS_DEV_V1.PROJECTS\nWHERE LOWER(\"Name\") LIKE '%langchain%'\nORDER BY \"StarsCount\" DESC\nLIMIT 5"
+        ],
+        [
+          "identity:langchain",
+          "SELECT \"System\", COUNT(*) AS version_count\nFROM DEPS_DEV_V1.DEPS_DEV_V1.PACKAGEVERSIONS\nWHERE \"Name\" = 'langchain'\nGROUP BY \"System\"\nORDER BY version_count DESC"
+        ]
+      ],
+      "signals": {
+        "cve": {
+          "verdict": "RED",
+          "detail": "10 CRITICAL / 1 HIGH / 1 MODERATE advisories; worst CVSS 9.8",
+          "worst_cvss": 9.8,
+          "counts": {
+            "CRITICAL": 10,
+            "HIGH": 1,
+            "MODERATE": 1
+          }
+        },
+        "capability": {
+          "verdict": "RED",
+          "detail": "capabilities: executes_code, accesses_network",
+          "flags": [
+            "executes_code",
+            "accesses_network"
+          ]
+        },
+        "staleness": {
+          "verdict": "GREEN",
+          "detail": "last release -246 days ago",
+          "days_since_last_release": -246
+        },
+        "blast": {
+          "verdict": "GREEN",
+          "detail": "2 downstream dependents",
+          "dependent_count": 2
+        },
+        "health": {
+          "verdict": "GREEN",
+          "detail": "1459 stars / 39 open issues",
+          "stars": 1459,
+          "open_issues": 39,
+          "has_repo": true
+        },
+        "identity": {
+          "verdict": "GREEN",
+          "detail": "identity looks legitimate",
+          "suspected_squat": false
+        }
+      },
+      "verdict": "RED",
+      "hindsight": {
+        "tag": "LangChain suffered multiple critical vulnerabilities disclosed 2024\u20112026.",
+        "source_url": "https://labs.cloudsecurityalliance.org/research/csa-research-note-langchain-langgraph-vulnerabilities-202603"
+      }
+    },
+    {
+      "name": "ollama",
+      "system": "PYPI",
+      "category": "INFERENCE_SERVER",
+      "capabilities": [
+        "exposes_server"
+      ],
+      "significance": "local LLM runner",
+      "stars": null,
+      "sql_log": [
+        [
+          "advisories:ollama",
+          ""
+        ],
+        [
+          "staleness:ollama",
+          "SELECT \n  TO_TIMESTAMP(MAX(\"UpstreamPublishedAt\") / 1000000) AS \"MostRecentUpstreamPublishedAt\",\n  COUNT(*) AS \"TotalVersions\"\nFROM DEPS_DEV_V1.DEPS_DEV_V1.PACKAGEVERSIONS\nWHERE \"System\" = 'PYPI' AND \"Name\" = 'ollama'"
+        ],
+        [
+          "dependents:ollama",
+          "SELECT COUNT(DISTINCT \"Dependent\":\"Name\"::VARCHAR) AS DISTINCT_DEPENDENT_PACKAGES\nFROM DEPS_DEV_V1.DEPS_DEV_V1.DEPENDENTS\nWHERE \"Name\" = 'ollama'\n  AND \"System\" = 'PYPI'"
+        ],
+        [
+          "health:ollama",
+          "SELECT \"Name\", \"StarsCount\", \"ForksCount\", \"OpenIssuesCount\", \"Licenses\"\nFROM DEPS_DEV_V1.DEPS_DEV_V1.PROJECTS\nWHERE LOWER(\"Name\") LIKE '%ollama%'\nORDER BY \"StarsCount\" DESC\nLIMIT 5"
+        ],
+        [
+          "identity:ollama",
+          "SELECT \"System\", COUNT(*) AS \"VersionCount\"\nFROM DEPS_DEV_V1.DEPS_DEV_V1.PACKAGEVERSIONS\nWHERE \"Name\" = 'ollama'\n  AND \"System\" IN ('PYPI','NPM','MAVEN','CARGO','GO','NUGET')\nGROUP BY \"System\"\nORDER BY \"VersionCount\" DESC"
+        ]
+      ],
+      "signals": {
+        "cve": {
+          "verdict": "GREEN",
+          "detail": "0 CRITICAL / 0 HIGH / 0 MODERATE advisories",
+          "worst_cvss": null,
+          "counts": {
+            "CRITICAL": 0,
+            "HIGH": 0,
+            "MODERATE": 0
+          }
+        },
+        "capability": {
+          "verdict": "YELLOW",
+          "detail": "capabilities: exposes_server",
+          "flags": [
+            "exposes_server"
+          ]
+        },
+        "staleness": {
+          "verdict": "GREEN",
+          "detail": "last release 30 days ago",
+          "days_since_last_release": 30
+        },
+        "blast": {
+          "verdict": "GREEN",
+          "detail": "0 downstream dependents",
+          "dependent_count": 0
+        },
+        "health": {
+          "verdict": "GREEN",
+          "detail": "5758 stars / 11 open issues",
+          "stars": 5758,
+          "open_issues": 11,
+          "has_repo": true
+        },
+        "identity": {
+          "verdict": "GREEN",
+          "detail": "identity looks legitimate",
+          "suspected_squat": false
+        }
+      },
+      "verdict": "YELLOW",
+      "hindsight": {
+        "tag": "Ollama v0.5.11 DoS vulnerability via malicious model download",
+        "source_url": "https://www.sentinelone.com/vulnerability-database/cve-2025-1975"
+      }
+    },
+    {
+      "name": "gradio",
+      "system": "PYPI",
+      "category": "INFERENCE_SERVER",
+      "capabilities": [
+        "exposes_server"
+      ],
+      "significance": "ML demo UI server (hosts public shares)",
+      "stars": null,
+      "sql_log": [
+        [
+          "advisories:gradio",
+          "SELECT \n    a.\"Title\",\n    a.\"CVSS3Score\",\n    a.\"GitHubSeverity\"\nFROM DEPS_DEV_V1.DEPS_DEV_V1.ADVISORIES a,\nLATERAL FLATTEN(input => a.\"Packages\") pkg\nWHERE pkg.value:Name::VARCHAR = 'gradio'\nORDER BY a.\"CVSS3Score\" DESC NULLS LAST"
+        ],
+        [
+          "staleness:gradio",
+          "SELECT\n    MAX(TO_TIMESTAMP(\"UpstreamPublishedAt\" / 1000000)) AS \"MostRecentUpstreamPublishedAt\",\n    COUNT(*) AS \"TotalVersions\"\nFROM \"DEPS_DEV_V1\".\"DEPS_DEV_V1\".\"PACKAGEVERSIONS\"\nWHERE \"System\" = 'PYPI'\n  AND \"Name\" = 'gradio'"
+        ],
+        [
+          "dependents:gradio",
+          "SELECT COUNT(DISTINCT \"Dependent\":\"Name\"::VARCHAR) AS DISTINCT_DEPENDENT_PACKAGES\nFROM DEPS_DEV_V1.DEPS_DEV_V1.DEPENDENTS\nWHERE \"System\" = 'PYPI'\n  AND \"Name\" = 'gradio'"
+        ],
+        [
+          "health:gradio",
+          "SELECT \"Name\", \"StarsCount\", \"ForksCount\", \"OpenIssuesCount\", \"Licenses\"\nFROM \"DEPS_DEV_V1\".\"DEPS_DEV_V1\".\"PROJECTS\"\nWHERE LOWER(\"Name\") LIKE '%gradio%'\nORDER BY \"StarsCount\" DESC\nLIMIT 5"
+        ],
+        [
+          "identity:gradio",
+          "WITH requested_systems AS (\n  SELECT column1 AS \"System\"\n  FROM VALUES ('PYPI'),('NPM'),('MAVEN'),('CARGO'),('GO'),('NUGET')\n)\nSELECT rs.\"System\",\n       COALESCE(pv.\"VersionCount\", 0) AS \"VersionCount\"\nFROM requested_systems rs\nLEFT JOIN (\n    SELECT \"System\", COUNT(*) AS \"VersionCount\"\n    FROM DEPS_DEV_V1.DEPS_DEV_V1.\"PACKAGEVERSIONS\"\n    WHERE \"Name\" = 'gradio'\n    GROUP BY \"System\"\n) pv ON rs.\"System\" = pv.\"System\"\nORDER BY \"VersionCount\" DESC, rs.\"System\" ASC"
+        ]
+      ],
+      "signals": {
+        "cve": {
+          "verdict": "YELLOW",
+          "detail": "0 CRITICAL / 3 HIGH / 1 MODERATE advisories; worst CVSS 8.8",
+          "worst_cvss": 8.8,
+          "counts": {
+            "CRITICAL": 0,
+            "HIGH": 3,
+            "MODERATE": 1
+          }
+        },
+        "capability": {
+          "verdict": "YELLOW",
+          "detail": "capabilities: exposes_server",
+          "flags": [
+            "exposes_server"
+          ]
+        },
+        "staleness": {
+          "verdict": "YELLOW",
+          "detail": "no release date available",
+          "days_since_last_release": null
+        },
+        "blast": {
+          "verdict": "GREEN",
+          "detail": "0 downstream dependents",
+          "dependent_count": 0
+        },
+        "health": {
+          "verdict": "GREEN",
+          "detail": "12 stars / 5 open issues",
+          "stars": 12,
+          "open_issues": 5,
+          "has_repo": true
+        },
+        "identity": {
+          "verdict": "GREEN",
+          "detail": "identity looks legitimate",
+          "suspected_squat": false
+        }
+      },
+      "verdict": "YELLOW",
+      "hindsight": {
+        "tag": "Gradio CVE-2024-10569 updated with SSVC details 2025-2026.",
+        "source_url": "https://nvd.nist.gov/vuln/detail/CVE-2024-10569"
+      }
+    },
+    {
+      "name": "chromadb",
+      "system": "PYPI",
+      "category": "VECTOR_DB",
+      "capabilities": [
+        "exposes_server"
+      ],
+      "significance": "popular embedded vector database",
+      "stars": null,
+      "sql_log": [
+        [
+          "advisories:chromadb",
+          ""
+        ],
+        [
+          "staleness:chromadb",
+          "SELECT\n    MAX(TO_TIMESTAMP(\"UpstreamPublishedAt\" / 1000000)) AS \"MostRecentUpstreamPublishedAt\",\n    COUNT(DISTINCT \"Version\") AS \"TotalVersions\"\nFROM \"DEPS_DEV_V1\".\"DEPS_DEV_V1\".\"PACKAGEVERSIONS\"\nWHERE \"Name\" = 'chromadb'\n  AND \"System\" = 'PYPI'"
+        ],
+        [
+          "dependents:chromadb",
+          "SELECT COUNT(DISTINCT \"Dependent\":\"Name\"::VARCHAR) AS distinct_dependent_packages\nFROM \"DEPS_DEV_V1\".\"DEPS_DEV_V1\".\"DEPENDENTS\"\nWHERE \"System\" = 'PYPI' AND \"Name\" = 'chromadb'"
+        ],
+        [
+          "health:chromadb",
+          ""
+        ],
+        [
+          "identity:chromadb",
+          ""
+        ]
+      ],
+      "signals": {
+        "cve": {
+          "verdict": "GREEN",
+          "detail": "0 CRITICAL / 0 HIGH / 0 MODERATE advisories",
+          "worst_cvss": null,
+          "counts": {
+            "CRITICAL": 0,
+            "HIGH": 0,
+            "MODERATE": 0
+          }
+        },
+        "capability": {
+          "verdict": "YELLOW",
+          "detail": "capabilities: exposes_server",
+          "flags": [
+            "exposes_server"
+          ]
+        },
+        "staleness": {
+          "verdict": "YELLOW",
+          "detail": "no release date available",
+          "days_since_last_release": null
+        },
+        "blast": {
+          "verdict": "GREEN",
+          "detail": "1 downstream dependents",
+          "dependent_count": 1
+        },
+        "health": {
+          "verdict": "YELLOW",
+          "detail": "no linked source repo (unauditable)",
+          "stars": null,
+          "open_issues": null,
+          "has_repo": false
+        },
+        "identity": {
+          "verdict": "GREEN",
+          "detail": "identity looks legitimate",
+          "suspected_squat": false
+        }
+      },
+      "verdict": "YELLOW",
+      "hindsight": {
+        "tag": "Critical unpatched RCE vulnerability affects ChromaDB v1.0.0-1.5.8",
+        "source_url": "https://labs.cloudsecurityalliance.org/wp-content/uploads/2026/05/CSA_research_note_chromadb_rce_ai_infrastructure_security_20260521-csa-styled.pdf"
+      }
+    },
+    {
+      "name": "litellm",
+      "system": "PYPI",
+      "category": "GATEWAY",
+      "capabilities": [
+        "accesses_network",
+        "handles_credentials"
+      ],
+      "significance": "multi-provider LLM gateway/proxy",
+      "stars": null,
+      "sql_log": [
+        [
+          "advisories:litellm",
+          ""
+        ],
+        [
+          "staleness:litellm",
+          "SELECT \n    TO_TIMESTAMP(MAX(\"UpstreamPublishedAt\") / 1000000) AS \"MostRecentUpstreamPublishedAt\",\n    COUNT(DISTINCT \"Version\") AS \"TotalVersions\"\nFROM \"DEPS_DEV_V1\".\"DEPS_DEV_V1\".\"PACKAGEVERSIONS\"\nWHERE LOWER(\"Name\") = 'litellm'"
+        ],
+        [
+          "dependents:litellm",
+          "SELECT COUNT(DISTINCT \"Dependent\":\"Name\"::VARCHAR) AS \"distinct_dependent_packages\"\nFROM \"DEPS_DEV_V1\".\"DEPS_DEV_V1\".\"DEPENDENTS\"\nWHERE \"Name\" = 'litellm' AND \"System\" = 'PYPI'"
+        ],
+        [
+          "health:litellm",
+          ""
+        ],
+        [
+          "identity:litellm",
+          "SELECT \"System\", COUNT(*) AS \"VersionCount\"\nFROM \"DEPS_DEV_V1\".\"DEPS_DEV_V1\".\"PACKAGEVERSIONS\"\nWHERE \"Name\" = 'litellm'\n  AND \"System\" IN ('PYPI', 'NPM', 'MAVEN', 'CARGO', 'GO', 'NUGET')\nGROUP BY \"System\"\nORDER BY \"VersionCount\" DESC"
+        ]
+      ],
+      "signals": {
+        "cve": {
+          "verdict": "GREEN",
+          "detail": "0 CRITICAL / 0 HIGH / 0 MODERATE advisories",
+          "worst_cvss": null,
+          "counts": {
+            "CRITICAL": 0,
+            "HIGH": 0,
+            "MODERATE": 0
+          }
+        },
+        "capability": {
+          "verdict": "GREEN",
+          "detail": "capabilities: accesses_network, handles_credentials",
+          "flags": [
+            "accesses_network",
+            "handles_credentials"
+          ]
+        },
+        "staleness": {
+          "verdict": "GREEN",
+          "detail": "last release -85 days ago",
+          "days_since_last_release": -85
+        },
+        "blast": {
+          "verdict": "GREEN",
+          "detail": "0 downstream dependents",
+          "dependent_count": 0
+        },
+        "health": {
+          "verdict": "YELLOW",
+          "detail": "no linked source repo (unauditable)",
+          "stars": null,
+          "open_issues": null,
+          "has_repo": false
+        },
+        "identity": {
+          "verdict": "GREEN",
+          "detail": "identity looks legitimate",
+          "suspected_squat": false
+        }
+      },
+      "verdict": "YELLOW",
+      "hindsight": {
+        "tag": "CVE-2024-9606 for litellm updated mid-2026 with SSVC details.",
+        "source_url": "https://nvd.nist.gov/vuln/detail/CVE-2024-9606"
+      }
+    },
+    {
+      "name": "llama-index",
+      "system": "PYPI",
+      "category": "ORCHESTRATION",
+      "capabilities": [
+        "executes_code",
+        "accesses_network"
+      ],
+      "significance": "RAG framework connecting LLMs to data",
+      "stars": null,
+      "sql_log": [
+        [
+          "advisories:llama-index",
+          "SELECT DISTINCT\n    a.\"Title\",\n    a.\"CVSS3Score\",\n    a.\"GitHubSeverity\"\nFROM DEPS_DEV_V1.DEPS_DEV_V1.ADVISORIES a,\n     LATERAL FLATTEN(INPUT => a.\"Packages\") f\nWHERE f.VALUE:\"Name\"::VARCHAR = 'llama-index'\nORDER BY a.\"CVSS3Score\" DESC"
+        ],
+        [
+          "staleness:llama-index",
+          "SELECT\n    TO_TIMESTAMP(MAX(\"UpstreamPublishedAt\") / 1000000) AS \"MostRecentUpstreamPublishedAt\",\n    COUNT(DISTINCT \"Version\") AS \"TotalVersions\"\nFROM \"DEPS_DEV_V1\".\"DEPS_DEV_V1\".\"PACKAGEVERSIONS\"\nWHERE \"System\" = 'PYPI'\n  AND \"Name\" = 'llama-index'"
+        ],
+        [
+          "dependents:llama-index",
+          "SELECT COUNT(DISTINCT \"Dependent\":\"Name\"::VARCHAR) AS distinct_transitive_dependents\nFROM \"DEPS_DEV_V1\".\"DEPS_DEV_V1\".\"DEPENDENTS\"\nWHERE \"Name\" = 'llama-index' AND \"System\" = 'PYPI'"
+        ],
+        [
+          "health:llama-index",
+          "SELECT \"Name\", \"StarsCount\", \"ForksCount\", \"OpenIssuesCount\", \"Licenses\"\nFROM \"DEPS_DEV_V1\".\"DEPS_DEV_V1\".\"PROJECTS\"\nWHERE LOWER(\"Name\") LIKE '%llama-index%'\nORDER BY \"StarsCount\" DESC\nLIMIT 5"
+        ],
+        [
+          "identity:llama-index",
+          ""
+        ]
+      ],
+      "signals": {
+        "cve": {
+          "verdict": "RED",
+          "detail": "1 CRITICAL / 0 HIGH / 0 MODERATE advisories; worst CVSS 9.8",
+          "worst_cvss": 9.8,
+          "counts": {
+            "CRITICAL": 1,
+            "HIGH": 0,
+            "MODERATE": 0
+          }
+        },
+        "capability": {
+          "verdict": "RED",
+          "detail": "capabilities: executes_code, accesses_network",
+          "flags": [
+            "executes_code",
+            "accesses_network"
+          ]
+        },
+        "staleness": {
+          "verdict": "YELLOW",
+          "detail": "no release date available",
+          "days_since_last_release": null
+        },
+        "blast": {
+          "verdict": "GREEN",
+          "detail": "0 downstream dependents",
+          "dependent_count": 0
+        },
+        "health": {
+          "verdict": "GREEN",
+          "detail": "0 stars / 0 open issues",
+          "stars": 0,
+          "open_issues": 0,
+          "has_repo": true
+        },
+        "identity": {
+          "verdict": "GREEN",
+          "detail": "identity looks legitimate",
+          "suspected_squat": false
+        }
+      },
+      "verdict": "RED",
+      "hindsight": {
+        "tag": "Critical SQLi vulnerability discovered and patched in LlamaIndex.",
+        "source_url": "https://www.endorlabs.com/learn/critical-sql-injection-vulnerability-in-llamaindex-cve-2025-1793---advisory-and-analysis"
+      }
+    }
+  ],
+  "candidates": [],
+  "coverage": {
+    "discovered": 9,
+    "note": "pinned + seeded fill run"
+  },
+  "errors": [],
+  "sql_log": [],
+  "cases": [
+    "mlflow",
+    "autogpt",
+    "anthropic"
+  ],
+  "dangers": [
+    {
+      "pattern": "Unrestricted code execution with network access",
+      "seen_in": [
+        "autogpt",
+        "langchain",
+        "llama-index"
+      ],
+      "remediation": "Run code in a sandboxed environment and disable outbound network unless explicitly required."
+    },
+    {
+      "pattern": "Exposure of server endpoints without authentication",
+      "seen_in": [
+        "mlflow",
+        "ollama",
+        "gradio",
+        "chromadb"
+      ],
+      "remediation": "Enforce authentication, use API gateways, and restrict server binding to trusted interfaces."
+    },
+    {
+      "pattern": "Deserialization of untrusted pickle data leading to arbitrary code execution",
+      "seen_in": [
+        "mlflow"
+      ],
+      "remediation": "Replace pickle with safe serialization formats (e.g., JSON) and validate all incoming data before deserialization."
+    },
+    {
+      "pattern": "Handling of credentials combined with network communication",
+      "seen_in": [
+        "litellm"
+      ],
+      "remediation": "Store credentials in a secret manager, use short-lived tokens, and ensure all network traffic is encrypted."
+    }
+  ]
+}
