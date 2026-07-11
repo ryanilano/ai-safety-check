@@ -13,7 +13,7 @@
 - **Python:** `requires-python = "==3.12.*"` (match customer-agent).
 - **Package manager:** `uv` (this app), run from repo root.
 - **Import convention:** package code uses **relative** imports (`from . import config`); tests and `app.py` use **absolute** `apps.ai_safety_check.*` imports. App dir is a Python package importable as `apps.ai_safety_check` — directory name uses an underscore, not a hyphen, so it is importable.
-- **Tests run from repo root:** `.venv/bin/python -m pytest apps/ai_safety_check/tests/ -q` (or `uv run pytest ...`). No network in unit tests — hand-rolled fakes + `monkeypatch` only (no mocking library).
+- **Tests run from repo root:** `apps/ai_safety_check/.venv/bin/python -m pytest apps/ai_safety_check/tests/ -q` (or `uv run pytest ...`). No network in unit tests — hand-rolled fakes + `monkeypatch` only (no mocking library).
 - **CRAFT connections (exact slugs):** `deps-dev-v1-cb6bf32f` (advisories/packages/dependents) and `github-repos-cb6bf32f` (repo metadata). Project id: `cb6bf32f-f77a-4092-93d4-ca5762a4ebfe`. Cluster: `https://nebius.emergence.ai/mcp`.
 - **`generate_sql` schema arg:** every call passes `{"schema_name": ..., "schema_fqn": ...}`; `schema_fqn` is exactly 3 dot-segments `{connection_slug}.{database}.{schema}` — for deps.dev that is `deps-dev-v1-cb6bf32f.DEPS_DEV_V1.DEPS_DEV_V1`.
 - **Severity column:** use `GitHubSeverity` in `ADVISORIES`, never `Severity` (all `UNKNOWN`).
@@ -158,9 +158,24 @@ TAVILY_API_KEY=
 `.gitignore`:
 ```
 .env
+.venv/
 runs/
 __pycache__/
 ```
+
+- [ ] **Step 2b: Create the app virtualenv (Python 3.12) and install deps**
+
+The repo-root `.venv` is Python 3.11 and lacks langgraph/openai — do NOT use it. Create a dedicated 3.12 venv for this app with `uv`, from the repo root:
+
+```bash
+uv venv --python 3.12 apps/ai_safety_check/.venv
+uv pip install --python apps/ai_safety_check/.venv \
+  langgraph==1.2.6 httpx==0.28.1 "openai>=1.40" tenacity==9.1.4 \
+  plotly==6.8.0 kaleido==0.2.1 "streamlit>=1.36" python-dotenv==1.2.2 \
+  rich==15.0.0 pytest pytest-asyncio
+```
+
+All test commands in this plan use `apps/ai_safety_check/.venv/bin/python -m pytest ...` run **from the repo root** (so `apps.ai_safety_check.*` absolute imports resolve — the repo root lands on `sys.path` under `python -m`). This app's `.venv` is gitignored.
 
 - [ ] **Step 3: Write the failing test**
 
@@ -201,7 +216,7 @@ def test_loads_and_derives_schema_fqn(monkeypatch):
 
 - [ ] **Step 4: Run test to verify it fails**
 
-Run: `.venv/bin/python -m pytest apps/ai_safety_check/tests/test_config.py -v`
+Run: `apps/ai_safety_check/.venv/bin/python -m pytest apps/ai_safety_check/tests/test_config.py -v`
 Expected: FAIL with `ModuleNotFoundError` / `RuntimeError` not raised (config.py not written yet).
 
 - [ ] **Step 5: Write `config.py`**
@@ -260,7 +275,7 @@ PINNED_CASES: list[str] = ["mlflow", "autogpt", "anthropic"]
 
 - [ ] **Step 6: Run test to verify it passes**
 
-Run: `.venv/bin/python -m pytest apps/ai_safety_check/tests/test_config.py -v`
+Run: `apps/ai_safety_check/.venv/bin/python -m pytest apps/ai_safety_check/tests/test_config.py -v`
 Expected: PASS (2 passed).
 
 - [ ] **Step 7: Commit**
@@ -356,7 +371,7 @@ def test_composite_all_green():
 
 - [ ] **Step 2: Run tests to verify they fail**
 
-Run: `.venv/bin/python -m pytest apps/ai_safety_check/tests/test_gating.py -v`
+Run: `apps/ai_safety_check/.venv/bin/python -m pytest apps/ai_safety_check/tests/test_gating.py -v`
 Expected: FAIL (`ModuleNotFoundError: apps.ai_safety_check.gating`).
 
 - [ ] **Step 3: Write `gating.py`**
@@ -451,7 +466,7 @@ def composite(signals: dict) -> str:
 
 - [ ] **Step 4: Run tests to verify they pass**
 
-Run: `.venv/bin/python -m pytest apps/ai_safety_check/tests/test_gating.py -v`
+Run: `apps/ai_safety_check/.venv/bin/python -m pytest apps/ai_safety_check/tests/test_gating.py -v`
 Expected: PASS (10 passed).
 
 - [ ] **Step 5: Commit**
@@ -509,7 +524,7 @@ def test_extract_result_unwraps_content_text():
 
 - [ ] **Step 3: Run test to verify it fails**, then adapt until green.
 
-Run: `.venv/bin/python -m pytest apps/ai_safety_check/tests/test_craft_client.py -v`
+Run: `apps/ai_safety_check/.venv/bin/python -m pytest apps/ai_safety_check/tests/test_craft_client.py -v`
 Expected first run: FAIL; after the copy+adapt: PASS.
 
 - [ ] **Step 4: Commit**
@@ -1145,7 +1160,7 @@ def _strip_fence(raw: str) -> str:
 
 - [ ] **Step 5: Run the node test to verify pass.**
 
-Run: `.venv/bin/python -m pytest apps/ai_safety_check/tests/test_nodes.py -v`
+Run: `apps/ai_safety_check/.venv/bin/python -m pytest apps/ai_safety_check/tests/test_nodes.py -v`
 Expected: PASS.
 
 - [ ] **Step 6: Commit**
@@ -1550,7 +1565,7 @@ else:
 
 - [ ] **Step 4: Run to verify pass** (AppTest renders with no cached run → shows info, button present).
 
-Run: `.venv/bin/python -m pytest apps/ai_safety_check/tests/test_app_renders.py -v`
+Run: `apps/ai_safety_check/.venv/bin/python -m pytest apps/ai_safety_check/tests/test_app_renders.py -v`
 Expected: PASS.
 
 - [ ] **Step 5: Commit**
@@ -1573,7 +1588,7 @@ git commit -m "feat(safety-check): Streamlit UI (cached render, re-run, ask-box)
 
 - [ ] **Step 1: Run the full unit suite**
 
-Run: `.venv/bin/python -m pytest apps/ai_safety_check/tests/ -q`
+Run: `apps/ai_safety_check/.venv/bin/python -m pytest apps/ai_safety_check/tests/ -q`
 Expected: all green.
 
 - [ ] **Step 2: Do a real end-to-end run** (needs `.env` filled with Nebius + Keycloak refresh token; Tavily optional)
